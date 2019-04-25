@@ -1,13 +1,30 @@
 package org.jtimer.Regression;
 
+/**
+ * Used to fit a set of data to polynomial
+ */
 public class PolynomialFit extends LinearRegression {
 	
-	double[] coefficients;
+	double[] coefficients; // The coefficients of the regression
 	
+	/**
+	 * Creates a PolynomialFit that will
+	 * over-fit the data provided
+	 * @param xs The x data
+	 * @param ys The y data
+	 */
 	public PolynomialFit(double[] xs, double[] ys) {
 		this(xs, ys, xs.length);
 	}
 	
+	/**
+	 * Creates a higher order PolynomialFit
+	 * that is in the form of
+	 * f(x) = C+x + ... + x^degree
+	 * @param xs The x data
+	 * @param ys The y data
+	 * @param terms The degree to use
+	 */
 	public PolynomialFit(double[] xs, double[] ys, int terms) {
 		coefficients = new double[terms];
 		Matrix xsMatrix = new Matrix(xs.length, terms);
@@ -29,6 +46,12 @@ public class PolynomialFit extends LinearRegression {
 		error(xs, ys);
 	}
 	
+	/**
+	 * Calculates f(x) using the generated
+	 * linear regression
+	 * @param x The x to use
+	 * @return f(x) aka y
+	 */
 	@Override
 	public double calculate(double x) {
 		double result = 0;

@@ -17,13 +17,24 @@ import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
 
+/**
+ * The brains behind everything I'd say. This is what times methods,
+ * adds timeout to methods, adds the data to a graph, recursively finds
+ * all methods inside a package, etc. It does a lot and I should probably
+ * split things up a bit just to make it look better.
+ */
 public class Runner {
 
-	private static String packageName;
-	private static Object object;
-	private static Thread time = new Thread();
-	private static long timer = -1l;
+	private static Object object; // The test class that is being run
+	private static Thread time = new Thread(); // The thread use to track timeout
+	private static long timer = -1l; // The timer to track timeout
 
+	/**
+	 * Runs all @Time methods inside of the package
+	 * pkg.
+	 * @param pkg The package containing the methods to run
+	 * @throws Throwable Anything thrown from running the methods.
+	 */
 	public static void time(String pkg) throws Throwable {
 		time(pkg, new TimeMethod() {
 
@@ -50,8 +61,7 @@ public class Runner {
 	 * @throws Throwable
 	 */
 	public static void time(String pkg, TimeMethod timeMethod) throws Throwable {
-		packageName = pkg;
-		for(Class<?> cls : getClasses(packageName)) {
+		for(Class<?> cls : getClasses(pkg)) {
 			object = cls.newInstance();
 			if (!cls.isAnnotation()) {
 				List<Method> beforeClass = new LinkedList<>();
@@ -100,6 +110,17 @@ public class Runner {
 		}
 	}
 
+	/**
+	 * Internal method used to add data to the graph
+	 * @param method The method to run
+	 * @param chart The chart to add the data to
+	 * @param x The x component
+	 * @param y The y component
+	 * @throws NoSuchFieldException If the field doesn't exist
+	 * @throws SecurityException If the security managers runs into a security violation
+	 * @throws IllegalArgumentException When a method doesn't have the given arguments
+	 * @throws IllegalAccessException When the reflector cannot access something
+	 */
 	private static void graphData(Method method, Series<Number, Number> chart, long x, long y) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 		chart.setName(method.getName().substring(0, 1).toUpperCase() + method.getName().substring(1));
 		Field graph = object.getClass().getDeclaredField("grapher");
@@ -116,7 +137,16 @@ public class Runner {
 		}
 	}
 	
-	private static CountDownLatch runWithTimeout(Method method, TimeMethod timeMethod, Series<Number, Number> data, long i, long timeout) throws BrokenBarrierException {
+	/**
+	 * Runs a method with a given timeout
+	 * @param method The method to run
+	 * @param timeMethod The time method to use to time it
+	 * @param data The series to add the data to
+	 * @param i The current repetition
+	 * @param timeout The timeout, in milliseconds
+	 * @return A countdown latch so that the timer can wait
+	 */
+	private static CountDownLatch runWithTimeout(Method method, TimeMethod timeMethod, Series<Number, Number> data, long i, long timeout) {
 		try {
 			if (timeout == -1l) {
 				timer = Long.MAX_VALUE;
@@ -156,13 +186,9 @@ public class Runner {
 			time.start();
 			gate.await();
 			return latch;
-		} catch (InterruptedException e) {
+		} catch (InterruptedException | BrokenBarrierException e) {
 			return new CountDownLatch(0);
 		}
-	}
-
-	public void setPkgName(String pkg) {
-		packageName = pkg;
 	}
 
 	/**
@@ -189,6 +215,7 @@ public class Runner {
 		}
 		return classes.toArray(new Class[classes.size()]);
 	}
+	
 	/**
 	 * Recursive method used to find all classes in a given directory and subdirs.
 	 *
@@ -214,6 +241,12 @@ public class Runner {
 		return classes;
 	}
 
+	/**
+	 * An interface used to change how
+	 * things are timed.
+	 * By default, {@link TimeMethod#timeMethod()} uses {@link System#nanoTime()}
+	 * and a method to convert nanoseconds into your custom timing method
+	 */
 	public interface TimeMethod {
 		public long timeMethod();
 		public long convertNano(long nano);

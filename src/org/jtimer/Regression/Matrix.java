@@ -4,11 +4,20 @@ import java.util.Arrays;
 
 import org.jtimer.Exceptions.DimensionsInvalidException;
 
-public class Matrix {
+/**
+ * A custom matrix class I use to make things easier
+ */
+class Matrix {
 
-    private Double[][] matrix;
+    private Double[][] matrix; // The internal data structre
 
-    public Matrix(int i, int j) {
+    /**
+     * Creates an matrix of size i x j
+     * and sets all the elements to 0 
+     * @param i The number of rows
+     * @param j The number of columns
+     */
+    Matrix(int i, int j) {
         matrix = new Double[i][j];
         for (int iX = 0; iX < i; iX++) {
             for (int jY = 0; jY < j; jY++) {
@@ -17,7 +26,12 @@ public class Matrix {
         }
     }
 
-    public Matrix(Number[][] matrix) {
+    /**
+     * Creates a matrix using a specified
+     * doubly[][]
+     * @param matrix The double[][] to transform
+     */
+    Matrix(Number[][] matrix) {
         this(matrix.length, matrix[0].length);
         for (int i=0; i<matrix.length; i++) {
             for (int j=0; j<matrix[0].length; j++) {
@@ -26,7 +40,12 @@ public class Matrix {
         }
     }
 
-    public Matrix add(Matrix other) {
+    /**
+     * Adds 2 matrices and returns the result
+     * @param other The matrix to add
+     * @return The result
+     */
+    Matrix add(Matrix other) {
         if (matrix.length != other.matrix.length || matrix[0].length != other.matrix[0].length) {
             throw new DimensionsInvalidException();
         }
@@ -39,7 +58,12 @@ public class Matrix {
         return new Matrix(result);
     }
 
-    public Matrix subtract(Matrix other) {
+    /**
+     * Subtracts 2 matrices and returns the result
+     * @param other The matrix to subtract
+     * @return The result
+     */
+    Matrix subtract(Matrix other) {
         if (matrix.length != other.matrix.length || matrix[0].length != other.matrix[0].length) {
             throw new DimensionsInvalidException();
         }
@@ -52,7 +76,12 @@ public class Matrix {
         return new Matrix(result);
     }
 
-    public Matrix scalarMultiply(Double other) {
+    /**
+     * Multiplies a matrix by a scalar
+     * @param other The scalar to multiply by
+     * @return The result
+     */
+    Matrix scalarMultiply(Double other) {
         Double[][] result = new Matrix(matrix.length, matrix[0].length).toArray();
         for (int i = 0; i < matrix.length; i++) {
             for (int j = 0; j < matrix[0].length; j++) {
@@ -62,7 +91,12 @@ public class Matrix {
         return new Matrix(result);
     }
 
-    public Matrix multiply(Matrix other) {
+    /**
+     * Multiplies 2 matrices and returns the result
+     * @param other The matrix to multiply
+     * @return The result
+     */
+    Matrix multiply(Matrix other) {
         if (this.matrix[0].length != other.matrix.length) {
             throw new DimensionsInvalidException();
         } else {
@@ -78,7 +112,11 @@ public class Matrix {
         }
     }
 
-    public Matrix transpose() {
+    /**
+     * Transposes a matrix and returns the result
+     * @return The transposed matrix
+     */
+    Matrix transpose() {
         Double[][] result = new Matrix(matrix[0].length, matrix.length).toArray();
         for (int i = 0; i < matrix.length; i++) {
             for (int j = 0; j < matrix[0].length; j++) {
@@ -88,7 +126,11 @@ public class Matrix {
         return new Matrix(result);
     }
     
-    public Matrix inverse() {
+    /**
+     * Inverts a matrix and returns the result
+     * @return The inverted matrix
+     */
+    Matrix inverse() {
     	Double[][] result = new Matrix(matrix.length, matrix.length).toArray();
     	for(int i=0; i<matrix.length; i++) {
     		for(int j=0; j<matrix.length; j++) {
@@ -106,7 +148,12 @@ public class Matrix {
     	return new Matrix(result);
     }
 
-    public Double determinant() {
+    /**
+     * Calculates the determinant of the matrix
+     * and returns in
+     * @return The determinant
+     */
+    Double determinant() {
         if (matrix.length == matrix[0].length) {
             if (matrix.length == 1) {
                 return matrix[0][0];
@@ -122,7 +169,10 @@ public class Matrix {
         }
     }
 
-    public Matrix coFactor(int c) {
+    /**
+     * Used by the determinant method
+     */
+    private Matrix coFactor(int c) {
         Double[][] coFactor = new Double[matrix.length - 1][matrix.length - 1];
         int i = 0, j = 0;
         for (int row = 0; row < matrix.length; row++) {
@@ -140,7 +190,14 @@ public class Matrix {
         return new Matrix(coFactor);
     }
     
-    public Matrix minorMatrix(int row, int col) {
+    /**
+     * Used by inverse to get
+     * the smaller submatrix
+     * @param row The row to exclude
+     * @param col The column to exlude
+     * @return The submatrix
+     */
+    Matrix minorMatrix(int row, int col) {
     	Double[][] result = new Matrix(matrix.length-1, matrix.length-1).toArray();
     	for (int i=0; i<matrix.length; i++) {
     		for (int j=0; i != row && j<matrix.length; j++) {
@@ -152,6 +209,9 @@ public class Matrix {
     	return new Matrix(result);
     }
 
+    /**
+     * Returns the Matrix as a string
+     */
     public String toString() {
         StringBuffer string = new StringBuffer();
         for (Double[] arr : matrix) {
@@ -160,7 +220,11 @@ public class Matrix {
         return string.toString();
     }
 
-    public Double[][] toArray() {
+    /**
+     * Returns the array that the matrix is using
+     * @return
+     */
+    Double[][] toArray() {
         return matrix.clone();
     }
 }

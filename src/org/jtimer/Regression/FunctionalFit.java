@@ -1,14 +1,34 @@
 package org.jtimer.Regression;
 
+/**
+ * Used to fit a set of data to a certain
+ * function
+ */
 public class FunctionalFit extends LinearRegression {
 	
-	double[] coefficients;
-	Function function;
+	double[] coefficients; // The coefficients of the regression
+	Function function; // The function used
 	
+	/**
+	 * Creates a FunctionalFit that is in the form
+	 * f(x) = function(x)+C
+	 * @param xs The x data
+	 * @param ys The y data
+	 * @param function The function to use
+	 */
 	public FunctionalFit(double[] xs, double[] ys, Function function) {
 		this(xs, ys, function, 2);
 	}
 	
+	/**
+	 * Creates a higher order FunctionalFit
+	 * that is in the form of
+	 * f(x) = C+function(x) + ... + function(x)^degree
+	 * @param xs The x data
+	 * @param ys The y data
+	 * @param function The function to use
+	 * @param degree The degree to use
+	 */
 	public FunctionalFit(double[] xs, double[] ys, Function function, int degree) {
 		this.function = function;
 		coefficients = new double[degree];
@@ -31,6 +51,12 @@ public class FunctionalFit extends LinearRegression {
 		error(xs, ys);
 	}
 	
+	/**
+	 * Calculates f(x) using the generated
+	 * linear regression
+	 * @param x The x to use
+	 * @return f(x) aka y
+	 */
 	@Override
 	public double calculate(double x) {
 		double result = 0;
@@ -40,6 +66,10 @@ public class FunctionalFit extends LinearRegression {
 		return result;
 	}
 	
+	/**
+	 * A custom function interface to define
+	 * the function to use
+	 */
 	public interface Function {
 		public double calc(double x);
 	}
