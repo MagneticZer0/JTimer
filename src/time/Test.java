@@ -1,49 +1,60 @@
 package time;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 
 import org.jtimer.Grapher;
 import org.jtimer.Runner;
-import org.jtimer.MethodTimer;
 import org.jtimer.Annotations.AfterClass;
+import org.jtimer.Annotations.Before;
 import org.jtimer.Annotations.BeforeClass;
 import org.jtimer.Annotations.Time;
 
 public class Test {
 	
-	ArrayList<String> list;
-	Grapher grapher;
-	long y;
+	Grapher grapher = Grapher.start(); // The graph to put data in
+	long counter = 0; // If you want some variable to keep the repitition that you're on.
+	
+	ArrayList<Double> list; // Just a variable I'm using for fun
 
 	public static void main(String[] args) throws Throwable {
 		Runner.time("time");
 	}
 	
+	// From here
 	@BeforeClass
 	public void startup() {
-		grapher = Grapher.start();
-		grapher.setMax(25000);
+		//grapher.setMax(25000);
 		list = new ArrayList<>();
 	}
 	
-	@Time
-	public void first() throws Throwable {
-		HashMap<String, String> map = new HashMap<>();
-		for(int i=0; i<10000; i++) {
-			grapher.addData(i, MethodTimer.time(map, "put", "key", "value", Object.class, Object.class));
+	@Before
+	public void add() {
+		for(int i=0; i<counter; i++) {
+			list.add(Math.random());
 		}
 	}
 	
-	@Time(graph = true, repeat=1000)
-	public void second() throws Throwable {
-		long time = MethodTimer.timeStatic(Thread.class, "sleep", 0, long.class);
-		y = time;
+	@Time(repeat=1000)
+	public void mapPut() {
+		HashMap<String, String> map = new HashMap<>();
+		map.put("a", "b");
 	}
 	
-	@Time(graph = true, repeat=1000)
-	public void arraylist() throws Throwable {
-		long time = MethodTimer.time(list, "add", "a", Object.class);
-		y = time;
+	@Time(repeat=10, timeout=1)
+	public void threadSleep() throws Throwable {
+		Thread.sleep(2000);
+	}
+	
+	@Time(repeat=1000)
+	public void listAdd() {
+		list.add(1.1);
+	}
+	// To here is optional
+	
+	@Time(repeat = 1000)
+	public void sort() {
+		Collections.sort(list);
 	}
 	
 	@AfterClass
