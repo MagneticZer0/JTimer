@@ -5,7 +5,6 @@ import java.util.HashMap;
 
 import org.jtimer.Grapher;
 import org.jtimer.Runner;
-import org.jtimer.Annotations.AfterClass;
 import org.jtimer.Annotations.Before;
 import org.jtimer.Annotations.BeforeClass;
 import org.jtimer.Annotations.Time;
@@ -50,7 +49,7 @@ public class Test {
 		list.add(1.1);
 	}
 	
-	@Time(repeat = 1000)
+	@Time(repeat = 3000)
 	public void sort() {
 		Collections.sort(list);
 	}

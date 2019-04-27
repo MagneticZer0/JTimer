@@ -1,6 +1,5 @@
 package org.jtimer;
 
-import java.util.ArrayList;
 import java.util.TreeSet;
 import java.util.concurrent.CountDownLatch;
 
@@ -28,18 +27,19 @@ public class Grapher extends Application {
 	private String graphTitle = "JTimer - "; // Title of the graph
 	private NumberAxis xAxis = new NumberAxis(); // Number axis for the x-axis
 	private NumberAxis yAxis = new NumberAxis(); // Number axis for the y-axis
-	ArrayList<Series<Number, Number>> data = new ArrayList<>(); // Array list for the data
 	private static Grapher grapher = null;
 	private static CountDownLatch latch = new CountDownLatch(1);
 	double max = Double.POSITIVE_INFINITY; // The maximum Y for the graph
 	private double maxDeviations = 3; // Max standard deviations shown in graph
 	private boolean isRunning = true; // If the timer is still running
-	private ScatterChart<Number, Number> scatterPlot = new ScatterChart<>(xAxis, yAxis);
+	public ScatterChart<Number, Number> scatterPlot = new ScatterChart<>(xAxis, yAxis);
 	
 	@Override
 	public void start(Stage stage) {
 		xAxis.setLabel("Repetitions");
 		yAxis.setLabel("Time (ns)");
+		xAxis.setAnimated(false);
+		yAxis.setAnimated(false);
 		
 		stage.setTitle("Grapher");
 		stage.setOnCloseRequest(e -> {
@@ -154,7 +154,6 @@ public class Grapher extends Application {
 		Platform.runLater(() -> {
 			isRunning = false;
 			scatterPlot.setTitle(scatterPlot.getTitle().split(" - ")[0]);
-			scatterPlot.getData().addAll(data);
 			lineOfBestFit();
 			prettifyView();
 			for (Node node : scatterPlot.getChildrenUnmodifiable()) {

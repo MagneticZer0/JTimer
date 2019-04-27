@@ -42,9 +42,7 @@ public class FunctionalFit extends LinearRegression {
 		for(int i=0; i<ys.length; i++) {
 			ysMatrix.toArray()[i][0] = ys[i];
 		}
-		Matrix AtA = xsMatrix.transpose().multiply(xsMatrix);
-		Matrix Atx = xsMatrix.transpose().multiply(ysMatrix);
-		Matrix solutionMatrix = AtA.inverse().multiply(Atx);
+		Matrix solutionMatrix = xsMatrix.transpose().multiply(xsMatrix).inverse().multiply(xsMatrix.transpose().multiply(ysMatrix));
 		for(int i=0; i<degree; i++) {
 			coefficients[i] = solutionMatrix.toArray()[i][0];
 		}

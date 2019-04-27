@@ -2,6 +2,7 @@ package org.jtimer;
 
 import org.jtimer.Annotations.*;
 
+import javafx.application.Platform;
 import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Series;
 
@@ -11,7 +12,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
@@ -152,19 +152,25 @@ public class Runner {
 	 * @throws IllegalAccessException When the reflector cannot access something
 	 */
 	private static void graphData(Method method, Series<Number, Number> chart, long x, long y) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
-		chart.setName(method.getName().substring(0, 1).toUpperCase() + method.getName().substring(1));
-		Field graph = object.getClass().getDeclaredField("grapher");
-		graph.setAccessible(true);
-		Field counter = object.getClass().getDeclaredField("counter");
-		counter.setAccessible(true);
-		counter.set(object, x);
-		Field graphMax = graph.getType().getDeclaredField("max");
-		if (y < ((double) graphMax.get(graph.get(object)))) {
-			chart.getData().add(new XYChart.Data<>(x, y));
-		}
-		if (!((Grapher) graph.get(object)).data.contains(chart) && chart.getData().size() != 0) {
-			((Grapher) graph.get(object)).data.add(chart);
-		}
+		Platform.runLater(() -> {
+			try {
+				chart.setName(method.getName().substring(0, 1).toUpperCase() + method.getName().substring(1));
+				Field graph = object.getClass().getDeclaredField("grapher");
+				graph.setAccessible(true);
+				Field counter = object.getClass().getDeclaredField("counter");
+				counter.setAccessible(true);
+				counter.set(object, x);
+				Field graphMax = graph.getType().getDeclaredField("max");
+				if (y < ((double) graphMax.get(graph.get(object)))) {
+					chart.getData().add(new XYChart.Data<>(x, y));
+				}
+				if (!((Grapher) graph.get(object)).scatterPlot.getData().contains(chart) && chart.getData().size() != 0) {
+					((Grapher) graph.get(object)).scatterPlot.getData().add(chart);
+				}
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
+		});
 	}
 	
 	/**
