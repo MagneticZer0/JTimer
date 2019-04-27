@@ -1,8 +1,6 @@
 //package time;
 //
-//import org.jtimer.Grapher;
-//import org.jtimer.Runner;
-//import org.jtimer.Annotations.AfterClass;
+//import org.jtimer.*;
 //
 //public class Barebones {	
 //	Grapher grapher = Grapher.start(); // The graph to put data in
@@ -13,9 +11,5 @@
 //	}
 //	
 //	// INSERT CODE HERE
-//	
-//	@AfterClass
-//	public void showGrapher() {
-//		grapher.finish();
-//	}
+//
 //}

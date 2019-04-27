@@ -21,7 +21,6 @@ public class Test {
 		Runner.time("time");
 	}
 	
-	// From here
 	@BeforeClass
 	public void startup() {
 		//grapher.setMax(25000);
@@ -41,7 +40,7 @@ public class Test {
 		map.put("a", "b");
 	}
 	
-	@Time(repeat=10, timeout=1)
+	@Time(repeat=100, timeout=1)
 	public void threadSleep() throws Throwable {
 		Thread.sleep(2000);
 	}
@@ -50,15 +49,9 @@ public class Test {
 	public void listAdd() {
 		list.add(1.1);
 	}
-	// To here is optional
 	
 	@Time(repeat = 1000)
 	public void sort() {
 		Collections.sort(list);
-	}
-	
-	@AfterClass
-	public void showGrapher() {
-		grapher.finish();
 	}
 }

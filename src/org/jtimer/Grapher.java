@@ -25,7 +25,7 @@ import javafx.stage.Stage;
 
 public class Grapher extends Application {
 
-	private String graphTitle = "JTimer - Running..."; // Title of the graph
+	private String graphTitle = "JTimer - "; // Title of the graph
 	private NumberAxis xAxis = new NumberAxis(); // Number axis for the x-axis
 	private NumberAxis yAxis = new NumberAxis(); // Number axis for the y-axis
 	ArrayList<Series<Number, Number>> data = new ArrayList<>(); // Array list for the data
@@ -42,6 +42,9 @@ public class Grapher extends Application {
 		yAxis.setLabel("Time (ns)");
 		
 		stage.setTitle("Grapher");
+		stage.setOnCloseRequest(e -> {
+			System.exit(0);
+		});
 
 		scatterPlot.setTitle(graphTitle);
 
@@ -53,7 +56,7 @@ public class Grapher extends Application {
 
 	/**
 	 * Sets the graph title. If the time method
-	 * is still running it will append " - Running"
+	 * is still running it will append a percentage
 	 * to the end of the title
 	 * @param graphTitle The title to set it to
 	 */
@@ -61,9 +64,21 @@ public class Grapher extends Application {
 		this.graphTitle = graphTitle;
 		scatterPlot.setTitle(graphTitle);
 		if(isRunning) {
-			this.graphTitle += " - Running...";
-			scatterPlot.setTitle(scatterPlot.getTitle() + " - Running...");
+			this.graphTitle += " - ";
+			scatterPlot.setTitle(scatterPlot.getTitle() + " - ");
 		}
+	}
+	
+	/**
+	 * Used to set the progress of the
+	 * graph so that the user knows that
+	 * something is actually happening
+	 * @param progress The progress that has been completed
+	 */
+	public void setProgress(Double progress) {
+		Platform.runLater(() -> {
+			scatterPlot.setTitle(graphTitle + String.format("%3.2f", progress*100) + "%");
+		});
 	}
 
 	/**
@@ -135,7 +150,7 @@ public class Grapher extends Application {
 	 * 	<li>Allows toggling of data</li>
 	 * </ul>
 	 */
-	public void finish() {
+	private void finish() {
 		Platform.runLater(() -> {
 			isRunning = false;
 			scatterPlot.setTitle(scatterPlot.getTitle().split(" - ")[0]);

@@ -8,8 +8,10 @@ import javafx.scene.chart.XYChart.Series;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
@@ -63,11 +65,12 @@ public class Runner {
 	public static void time(String pkg, TimeMethod timeMethod) throws Throwable {
 		for(Class<?> cls : getClasses(pkg)) {
 			object = cls.newInstance();
-			if (!cls.isAnnotation()) {
+			if (!cls.isAnnotation() && !cls.isInterface() && !cls.isEnum()) {
 				List<Method> beforeClass = new LinkedList<>();
 				List<Method> before = new LinkedList<>();
 				List<Method> afterClass = new LinkedList<>();
 				List<Method> after = new LinkedList<>();
+				long repetitions = 0;
 				for(Method method : cls.getDeclaredMethods()) {
 					if (method.isAnnotationPresent(BeforeClass.class)) {
 						beforeClass.add(method);
@@ -81,11 +84,15 @@ public class Runner {
 					if (method.isAnnotationPresent(After.class)) {
 						after.add(method);
 					}
+					if (method.isAnnotationPresent(Time.class)) {
+						repetitions += method.getAnnotation(Time.class).repeat();
+					}
 				}
 				for(Method method : beforeClass) {
 					method.setAccessible(true);
 					method.invoke(object);
 				}
+				long times = 0;
 				for(Method method : cls.getDeclaredMethods()) {
 					if (method.isAnnotationPresent(Time.class)) {
 						Series<Number, Number> data = new Series<>();
@@ -99,6 +106,10 @@ public class Runner {
 								aft.setAccessible(true);
 								aft.invoke(object);
 							}
+							times++;
+							Field graph = object.getClass().getDeclaredField("grapher");
+							graph.setAccessible(true);
+							((Grapher) graph.get(object)).setProgress(((double)times/(double)repetitions));
 						}
 					}
 				}
@@ -106,8 +117,27 @@ public class Runner {
 					method.setAccessible(true);
 					method.invoke(object);
 				}
+				graphFinish(object);
 			}
 		}
+	}
+
+	/**
+	 * Finishes a graph by executing the {@link Grapher#finish()} method.
+	 * @param object The object the grapher is located in
+	 * @throws NoSuchFieldException If the field doesn't exist
+	 * @throws SecurityException If there is a Security Manager encounters something
+	 * @throws NoSuchMethodException If the method doesn't exist
+	 * @throws IllegalAccessException If you're not allowed to access something
+	 * @throws IllegalArgumentException If the arguments given are not correct
+	 * @throws InvocationTargetException If you're invoking the method on an incorrect object
+	 */
+	private static void graphFinish(Object object) throws NoSuchFieldException, SecurityException, NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		Field grapherField = object.getClass().getDeclaredField("grapher");
+		grapherField.setAccessible(true);
+		Method graphFinish = grapherField.getType().getDeclaredMethod("finish");
+		graphFinish.setAccessible(true);
+		graphFinish.invoke(grapherField.get(object));
 	}
 
 	/**
