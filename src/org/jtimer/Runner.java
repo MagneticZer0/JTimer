@@ -70,8 +70,9 @@ public class Runner {
 				object = cls.newInstance();
 				List<Method> beforeClass = new LinkedList<>();
 				List<Method> before = new LinkedList<>();
-				List<Method> afterClass = new LinkedList<>();
+				List<Method> time = new LinkedList<>();
 				List<Method> after = new LinkedList<>();
+				List<Method> afterClass = new LinkedList<>();
 				long repetitions = 0;
 				for(Method method : cls.getDeclaredMethods()) {
 					if (method.isAnnotationPresent(BeforeClass.class)) {
@@ -87,6 +88,7 @@ public class Runner {
 						after.add(method);
 					}
 					if (method.isAnnotationPresent(Time.class)) {
+						time.add(method);
 						repetitions += method.getAnnotation(Time.class).repeat();
 					}
 				}
@@ -95,22 +97,20 @@ public class Runner {
 					method.invoke(object);
 				}
 				long times = 0;
-				for(Method method : cls.getDeclaredMethods()) {
-					if (method.isAnnotationPresent(Time.class)) {
-						Series<Number, Number> data = new Series<>();
-						for(int i=1; i<=method.getAnnotation(Time.class).repeat(); i++) {
-							for(Method bef : before) {
-								bef.setAccessible(true);
-								bef.invoke(object);
-							}
-							runWithTimeout(method, timeMethod, data, i, method.getAnnotation(Time.class).timeout()).await();
-							for(Method aft : after) {
-								aft.setAccessible(true);
-								aft.invoke(object);
-							}
-							times++;
-							grapher.setProgress(((double)times/repetitions));
+				for(Method method : time) {
+					Series<Number, Number> data = new Series<>();
+					for(int i=1; i<=method.getAnnotation(Time.class).repeat(); i++) {
+						for(Method bef : before) {
+							bef.setAccessible(true);
+							bef.invoke(object);
 						}
+						runWithTimeout(method, timeMethod, data, i, method.getAnnotation(Time.class).timeout()).await();
+						for(Method aft : after) {
+							aft.setAccessible(true);
+							aft.invoke(object);
+						}
+						times++;
+						grapher.setProgress(((double)times/repetitions));
 					}
 				}
 				for(Method method : afterClass) {
@@ -273,8 +273,18 @@ public class Runner {
 		return classes;
 	}
 	
+	/**
+	 * Tells if a class is instantiable by checking
+	 * various thing
+	 * @param cls The class to see
+	 * @return If it is instantiable
+	 */
 	private static boolean isInstantiable(Class<?> cls) {
-		return !(cls.isAnnotation() || cls.isArray() || cls.isInterface() || cls.isEnum() || cls.isPrimitive() || Modifier.isAbstract(cls.getModifiers()));
+		if (cls.getEnclosingClass() != null) {
+			return !(cls.isAnnotation() || cls.isArray() || cls.isInterface() || cls.isEnum() || cls.isPrimitive() || Modifier.isAbstract(cls.getModifiers()) || isInstantiable(cls.getEnclosingClass()));
+		} else {
+			return !(cls.isAnnotation() || cls.isArray() || cls.isInterface() || cls.isEnum() || cls.isPrimitive() || Modifier.isAbstract(cls.getModifiers()));
+		}
 	}
 
 	/**
