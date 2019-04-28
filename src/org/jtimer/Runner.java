@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.LinkedList;
@@ -27,6 +28,7 @@ import java.util.concurrent.CyclicBarrier;
  */
 public class Runner {
 
+	private static Grapher grapher = Grapher.start(); // The graph to put data in
 	private static Object object; // The test class that is being run
 	private static Thread time = new Thread(); // The thread use to track timeout
 	private static long timer = -1l; // The timer to track timeout
@@ -64,8 +66,8 @@ public class Runner {
 	 */
 	public static void time(String pkg, TimeMethod timeMethod) throws Throwable {
 		for(Class<?> cls : getClasses(pkg)) {
-			object = cls.newInstance();
-			if (!cls.isAnnotation() && !cls.isInterface() && !cls.isEnum()) {
+			if (isInstantiable(cls) && cls.getEnclosingClass() == null) {
+				object = cls.newInstance();
 				List<Method> beforeClass = new LinkedList<>();
 				List<Method> before = new LinkedList<>();
 				List<Method> afterClass = new LinkedList<>();
@@ -107,9 +109,7 @@ public class Runner {
 								aft.invoke(object);
 							}
 							times++;
-							Field graph = object.getClass().getDeclaredField("grapher");
-							graph.setAccessible(true);
-							((Grapher) graph.get(object)).setProgress(((double)times/(double)repetitions));
+							grapher.setProgress(((double)times/repetitions));
 						}
 					}
 				}
@@ -117,7 +117,7 @@ public class Runner {
 					method.setAccessible(true);
 					method.invoke(object);
 				}
-				graphFinish(object);
+				graphFinish();
 			}
 		}
 	}
@@ -132,12 +132,10 @@ public class Runner {
 	 * @throws IllegalArgumentException If the arguments given are not correct
 	 * @throws InvocationTargetException If you're invoking the method on an incorrect object
 	 */
-	private static void graphFinish(Object object) throws NoSuchFieldException, SecurityException, NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		Field grapherField = object.getClass().getDeclaredField("grapher");
-		grapherField.setAccessible(true);
-		Method graphFinish = grapherField.getType().getDeclaredMethod("finish");
+	private static void graphFinish() throws NoSuchFieldException, SecurityException, NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		Method graphFinish = grapher.getClass().getDeclaredMethod("finish");
 		graphFinish.setAccessible(true);
-		graphFinish.invoke(grapherField.get(object));
+		graphFinish.invoke(grapher);
 	}
 
 	/**
@@ -155,17 +153,15 @@ public class Runner {
 		Platform.runLater(() -> {
 			try {
 				chart.setName(method.getName().substring(0, 1).toUpperCase() + method.getName().substring(1));
-				Field graph = object.getClass().getDeclaredField("grapher");
-				graph.setAccessible(true);
 				Field counter = object.getClass().getDeclaredField("counter");
 				counter.setAccessible(true);
 				counter.set(object, x);
-				Field graphMax = graph.getType().getDeclaredField("max");
-				if (y < ((double) graphMax.get(graph.get(object)))) {
+				Field graphMax = grapher.getClass().getDeclaredField("max");
+				if (y < ((double) graphMax.get(grapher))) {
 					chart.getData().add(new XYChart.Data<>(x, y));
 				}
-				if (!((Grapher) graph.get(object)).scatterPlot.getData().contains(chart) && chart.getData().size() != 0) {
-					((Grapher) graph.get(object)).scatterPlot.getData().add(chart);
+				if (!grapher.scatterPlot.getData().contains(chart) && chart.getData().size() != 0) {
+					grapher.scatterPlot.getData().add(chart);
 				}
 			} catch(Exception e) {
 				e.printStackTrace();
@@ -275,6 +271,10 @@ public class Runner {
 			}
 		}
 		return classes;
+	}
+	
+	private static boolean isInstantiable(Class<?> cls) {
+		return !(cls.isAnnotation() || cls.isArray() || cls.isInterface() || cls.isEnum() || cls.isPrimitive() || Modifier.isAbstract(cls.getModifiers()));
 	}
 
 	/**

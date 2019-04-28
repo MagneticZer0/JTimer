@@ -11,7 +11,7 @@ import org.jtimer.Annotations.Time;
 
 public class Test {
 	
-	Grapher grapher = Grapher.start(); // The graph to put data in
+	
 	long counter = 0; // If you want some variable to keep the repitition that you're on.
 	
 	ArrayList<Double> list; // Just a variable I'm using for fun

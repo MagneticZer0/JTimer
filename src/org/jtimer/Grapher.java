@@ -1,7 +1,11 @@
 package org.jtimer;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.TreeSet;
 import java.util.concurrent.CountDownLatch;
+
+import javax.imageio.ImageIO;
 
 import org.jtimer.Regression.FunctionalFit;
 import org.jtimer.Regression.LinearRegression;
@@ -12,14 +16,21 @@ import com.sun.javafx.charts.Legend.LegendItem;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
+import javafx.scene.image.WritableImage;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseButton;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 public class Grapher extends Application {
@@ -32,6 +43,7 @@ public class Grapher extends Application {
 	double max = Double.POSITIVE_INFINITY; // The maximum Y for the graph
 	private double maxDeviations = 3; // Max standard deviations shown in graph
 	private boolean isRunning = true; // If the timer is still running
+	private KeyCombination save = new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN); // Keybind to save the graph
 	public ScatterChart<Number, Number> scatterPlot = new ScatterChart<>(xAxis, yAxis);
 	
 	@Override
@@ -49,6 +61,21 @@ public class Grapher extends Application {
 		scatterPlot.setTitle(graphTitle);
 
 		Scene scene = new Scene(scatterPlot, 800, 600);
+		
+		scene.setOnKeyPressed(e -> {
+			if (save.match(e)) {
+				FileChooser chooser = new FileChooser();
+				chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image (*.png)", "*.png"));
+				chooser.setTitle("Select where to save the graph...");
+				File output = chooser.showSaveDialog(stage);
+				WritableImage image = scatterPlot.snapshot(new SnapshotParameters(), null);
+				try {
+					ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", output);
+				} catch (IOException ex) {
+					ex.printStackTrace();
+				}
+			}
+		});
 
 		stage.setScene(scene);
 		stage.show();
@@ -163,8 +190,8 @@ public class Grapher extends Application {
 						for (Series<Number, Number> series : scatterPlot.getData()) {
 							if (series.getName().equals(item.getText())) {
 								item.getSymbol().setCursor(Cursor.HAND);
-								item.getSymbol().setOnMouseClicked(event -> {
-									if (event.getButton() == MouseButton.PRIMARY) {
+								item.getSymbol().setOnMouseClicked(e -> {
+									if (e.getButton() == MouseButton.PRIMARY) {
 										for (Data<Number, Number> data : series.getData()) {
 											if (data.getNode() != null) {
 												data.getNode().setVisible(!data.getNode().isVisible());
