@@ -33,26 +33,60 @@ import javafx.scene.input.MouseButton;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+/**
+ * The object that graphs all the data
+ */
 public class Grapher extends Application {
 
-	private String graphTitle = "JTimer - "; // Title of the graph
-	private NumberAxis xAxis = new NumberAxis(); // Number axis for the x-axis
-	private NumberAxis yAxis = new NumberAxis(); // Number axis for the y-axis
+	/**
+	 * Title of the graph
+	 */
+	private String graphTitle = "JTimer - ";
+	/**
+	 * Number axis for the x-axis
+	 */
+	private NumberAxis xAxis = new NumberAxis();
+	/**
+	 * Number axis for the y-axis
+	 */
+	private NumberAxis yAxis = new NumberAxis();
+	/**
+	 * The grapher object
+	 */
 	private static Grapher grapher = null;
+	/**
+	 * The latch for the grapher
+	 */
 	private static CountDownLatch latch = new CountDownLatch(1);
-	double max = Double.POSITIVE_INFINITY; // The maximum Y for the graph
-	private double maxDeviations = 3; // Max standard deviations shown in graph
-	private boolean isRunning = true; // If the timer is still running
-	private KeyCombination save = new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN); // Keybind to save the graph
+	/**
+	 * The maximum Y for the graph By default this is
+	 * {@link Double#POSITIVE_INFINITY}
+	 */
+	private double max = Double.POSITIVE_INFINITY;
+	/**
+	 * Max standard deviations shown in graph by default this is 3
+	 */
+	private double maxDeviations = 3;
+	/**
+	 * If the timer is still running
+	 */
+	private boolean isRunning = true;
+	/**
+	 * Keybind to save the graph By default this is CTRL + S
+	 */
+	private KeyCombination save = new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN);
+	/**
+	 * The actual scatter plot
+	 */
 	public ScatterChart<Number, Number> scatterPlot = new ScatterChart<>(xAxis, yAxis);
-	
+
 	@Override
 	public void start(Stage stage) {
 		xAxis.setLabel("Repetitions");
 		yAxis.setLabel("Time (ns)");
 		xAxis.setAnimated(false);
 		yAxis.setAnimated(false);
-		
+
 		stage.setTitle("Grapher");
 		stage.setOnCloseRequest(e -> {
 			System.exit(0);
@@ -61,7 +95,7 @@ public class Grapher extends Application {
 		scatterPlot.setTitle(graphTitle);
 
 		Scene scene = new Scene(scatterPlot, 800, 600);
-		
+
 		scene.setOnKeyPressed(e -> {
 			if (save.match(e)) {
 				FileChooser chooser = new FileChooser();
@@ -82,34 +116,35 @@ public class Grapher extends Application {
 	}
 
 	/**
-	 * Sets the graph title. If the time method
-	 * is still running it will append a percentage
-	 * to the end of the title
+	 * Sets the graph title. If the time method is still running it will append a
+	 * percentage to the end of the title
+	 * 
 	 * @param graphTitle The title to set it to
 	 */
 	public void setGraphTitle(String graphTitle) {
 		this.graphTitle = graphTitle;
 		scatterPlot.setTitle(graphTitle);
-		if(isRunning) {
+		if (isRunning) {
 			this.graphTitle += " - ";
 			scatterPlot.setTitle(scatterPlot.getTitle() + " - ");
 		}
 	}
-	
+
 	/**
-	 * Used to set the progress of the
-	 * graph so that the user knows that
-	 * something is actually happening
+	 * Used to set the progress of the graph so that the user knows that something
+	 * is actually happening
+	 * 
 	 * @param progress The progress that has been completed
 	 */
 	public void setProgress(Double progress) {
 		Platform.runLater(() -> {
-			scatterPlot.setTitle(graphTitle + String.format("%3.2f", progress*100) + "%");
+			scatterPlot.setTitle(graphTitle + String.format("%3.2f", progress * 100) + "%");
 		});
 	}
 
 	/**
 	 * Sets the string for the x-axis
+	 * 
 	 * @param xDesc The string for the x-axis
 	 */
 	public void setxDesc(String xDesc) {
@@ -118,6 +153,7 @@ public class Grapher extends Application {
 
 	/**
 	 * Sets the string for the y-axis
+	 * 
 	 * @param yDesc The string for the y-axis
 	 */
 	public void setyDesc(String yDesc) {
@@ -125,9 +161,10 @@ public class Grapher extends Application {
 	}
 
 	/**
-	 * Sets the maximum value that the graph
-	 * will graph. By default this is Double.POSITIVE_INFINITY
-	 * @see Double.POSITIVE_INFINITY
+	 * Sets the maximum value that the graph will graph. By default this is
+	 * {@link Double#POSITIVE_INFINITY}
+	 * 
+	 * @see Double#POSITIVE_INFINITY
 	 * @param max The maximum value
 	 */
 	public void setMax(double max) {
@@ -135,9 +172,9 @@ public class Grapher extends Application {
 	}
 
 	/**
-	 * Maximum amount of deviations the graph will show
-	 * by default this is 3, so data only within 3 standard
-	 * deviations will be shown.
+	 * Maximum amount of deviations the graph will show by default this is 3, so
+	 * data only within 3 standard deviations will be shown.
+	 * 
 	 * @param maxDeviations The maximum amount of deviations
 	 */
 	public void setMaxDeviations(double maxDeviations) {
@@ -171,10 +208,10 @@ public class Grapher extends Application {
 	/**
 	 * Finishes a graph by:
 	 * <ul>
-	 * 	<li>Adding all the data</li>
-	 * 	<li>Calculating lines of best fit</li>
-	 * 	<li>Limiting the graph view</li>
-	 * 	<li>Allows toggling of data</li>
+	 * <li>Adding all the data</li>
+	 * <li>Calculating lines of best fit</li>
+	 * <li>Limiting the graph view</li>
+	 * <li>Allows toggling of data</li>
 	 * </ul>
 	 */
 	private void finish() {
@@ -212,17 +249,16 @@ public class Grapher extends Application {
 	}
 
 	/**
-	 * "Prettifies" a graph by limiting the view of it
-	 * to within {@link Grapher#maxDeviations} standard deviations
-	 * Also makes the data points on the graph a bit smaller
-	 * since they're too big by default.
+	 * "Prettifies" a graph by limiting the view of it to within
+	 * {@link Grapher#maxDeviations} standard deviations Also makes the data points
+	 * on the graph a bit smaller since they're too big by default.
 	 */
 	private void prettifyView() {
 		double total = 0;
 		double maxX = 0;
 		int points = 0;
-		for(Series<Number, Number> dataPoint : scatterPlot.getData()) {
-			for(Data<Number, Number> data : dataPoint.getData()) {
+		for (Series<Number, Number> dataPoint : scatterPlot.getData()) {
+			for (Data<Number, Number> data : dataPoint.getData()) {
 				data.getNode().setScaleX(0.7);
 				data.getNode().setScaleY(0.7);
 				if (data.getNode().isVisible()) {
@@ -234,62 +270,62 @@ public class Grapher extends Application {
 				}
 			}
 		}
-		double mean = total/points;
+		double mean = total / points;
 		total = 0;
-		for(Series<Number, Number> dataPoint : scatterPlot.getData()) {
-			for(Data<Number, Number> data : dataPoint.getData()) {
+		for (Series<Number, Number> dataPoint : scatterPlot.getData()) {
+			for (Data<Number, Number> data : dataPoint.getData()) {
 				if (data.getNode().isVisible()) {
-					total += Math.pow(data.getYValue().doubleValue()-mean, 2);
+					total += Math.pow(data.getYValue().doubleValue() - mean, 2);
 				}
 			}
 		}
-		double deviation = Math.sqrt(total/points);
+		double deviation = Math.sqrt(total / points);
 		yAxis.setAutoRanging(false);
-		yAxis.setLowerBound(Math.round(((mean-maxDeviations*deviation < 0) || (deviation == 0)) ? 0 : mean-maxDeviations*deviation));
-		yAxis.setUpperBound(Math.round((deviation != 0) ? mean+maxDeviations*deviation : 2*mean));
-		yAxis.setTickUnit(Math.round((yAxis.getUpperBound()-yAxis.getLowerBound())/10));
+		yAxis.setLowerBound(Math.round(((mean - maxDeviations * deviation < 0) || (deviation == 0)) ? 0 : mean - maxDeviations * deviation));
+		yAxis.setUpperBound(Math.round((deviation != 0) ? mean + maxDeviations * deviation : 2 * mean));
+		yAxis.setTickUnit(Math.round((yAxis.getUpperBound() - yAxis.getLowerBound()) / 10));
 		xAxis.setAutoRanging(false);
 		xAxis.setLowerBound(0);
 		xAxis.setUpperBound(maxX);
-		xAxis.setTickUnit(Math.round(maxX/10));
+		xAxis.setTickUnit(Math.round(maxX / 10));
 	}
-	
+
 	/**
-	 * Calculates the line of best fit using
-	 * linear regression. 
-	 * CURRENTLY AN EXPERIMENTAL FEATURE
+	 * Calculates the line of best fit using linear regression. 
+	 * <br><b>CURRENTLY AN EXPERIMENTAL FEATURE</b>
 	 */
 	private void lineOfBestFit() {
 		TreeSet<LinearRegression> regressions = null;
-		for(Series<Number, Number> series : scatterPlot.getData()) {
+		for (Series<Number, Number> series : scatterPlot.getData()) {
 			regressions = new TreeSet<>();
 			double[][] data = getData(series);
-			LinearRegression[] fit = {
-					new PolynomialFit(data[0], data[1], 2).name("O(n)"), 
-					new PolynomialFit(data[0], data[1], 3).name("O(n^2)"), 
-					new PolynomialFit(data[0], data[1], 4).name("O(n^3)"), 
-					new FunctionalFit(data[0], data[1], x -> Math.log(x)).name("O(lg n)"), 
-					new FunctionalFit(data[0], data[1], x -> x*Math.log(x)).name("O(n lg n)"), 
-					new FunctionalFit(data[0], data[1], x -> Math.pow(2, x)).name("O(2^n)")};
+			LinearRegression[] fit = { 
+					new PolynomialFit(data[0], data[1], 2).name("O(n)"),
+					new PolynomialFit(data[0], data[1], 3).name("O(n^2)"),
+					new PolynomialFit(data[0], data[1], 4).name("O(n^3)"),
+					new FunctionalFit(data[0], data[1], x -> Math.log(x)).name("O(lg n)"),
+					new FunctionalFit(data[0], data[1], x -> x * Math.log(x)).name("O(n lg n)"),
+					new FunctionalFit(data[0], data[1], x -> Math.pow(2, x)).name("O(2^n)") };
 			for (LinearRegression reg : fit) {
 				regressions.add(reg);
 			}
 			regressions.first();
 		}
 	}
-	
+
 	/**
 	 * Gets the XS and YS of a series, used by {@link Grapher#lineOfBestFit()}
+	 * 
 	 * @param series The series
 	 * @return A double[][] of xs and ys
 	 */
 	private double[][] getData(Series<Number, Number> series) {
 		double[] xs = new double[series.getData().size()];
 		double[] ys = new double[xs.length];
-		for(int i=0; i<xs.length; i++) {
+		for (int i = 0; i < xs.length; i++) {
 			xs[i] = series.getData().get(i).getXValue().doubleValue();
 			ys[i] = series.getData().get(i).getYValue().doubleValue();
 		}
-		return new double[][]{xs, ys};
+		return new double[][] { xs, ys };
 	}
 }

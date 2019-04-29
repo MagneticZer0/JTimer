@@ -1,8 +1,8 @@
 package org.jtimer.Exceptions;
 
 /**
- * Used if a matrix doesn't have the necessary
- * dimensions to execute the task at hand
+ * Used if a matrix doesn't have the necessary dimensions to execute the task at
+ * hand
  */
 public class DimensionsInvalidException extends RuntimeException {
 
