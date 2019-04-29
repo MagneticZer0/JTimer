@@ -25,6 +25,8 @@ import java.util.concurrent.CyclicBarrier;
  * timeout to methods, adds the data to a graph, recursively finds all methods
  * inside a package, etc. It does a lot and I should probably split things up a
  * bit just to make it look better.
+ * 
+ * @author MagneticZero
  */
 public class Runner {
 
@@ -145,6 +147,10 @@ public class Runner {
 				graphFinish();
 			}
 		}
+	}
+
+	public static Grapher getGrapher() {
+		return grapher;
 	}
 
 	/**

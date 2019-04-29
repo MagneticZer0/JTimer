@@ -6,8 +6,10 @@ import org.jtimer.Exceptions.DimensionsInvalidException;
 
 /**
  * A custom matrix class I use to make things easier
+ * 
+ * @author MagneticZero
  */
-class Matrix {
+public class Matrix {
 
 	/**
 	 * The internal data structure

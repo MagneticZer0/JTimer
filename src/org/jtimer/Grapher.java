@@ -35,6 +35,8 @@ import javafx.stage.Stage;
 
 /**
  * The object that graphs all the data
+ * 
+ * @author MagneticZero
  */
 public class Grapher extends Application {
 
@@ -64,9 +66,9 @@ public class Grapher extends Application {
 	 */
 	private double max = Double.POSITIVE_INFINITY;
 	/**
-	 * Max standard deviations shown in graph by default this is 3
+	 * Max standard deviations shown in graph by default this is 2
 	 */
-	private double maxDeviations = 3;
+	private double maxDeviations = 2;
 	/**
 	 * If the timer is still running
 	 */

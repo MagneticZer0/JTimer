@@ -1,7 +1,9 @@
 package org.jtimer.Regression;
 
 /**
- * Used to fit a set of data to a certain function
+ * Used to fit a set of data to a certain function.
+ * 
+ * @author MagneticZero
  */
 public class FunctionalFit extends LinearRegression {
 

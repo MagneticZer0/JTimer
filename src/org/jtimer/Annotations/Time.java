@@ -11,6 +11,8 @@ import java.lang.annotation.*;
  * {@link Time#timeout()} Has a timeout time, be default there is no timeout.
  * The timeout is in nanosecond and a test will be be halted after the timeout
  * has been reached.
+ * 
+ * @author MagneticZero
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)

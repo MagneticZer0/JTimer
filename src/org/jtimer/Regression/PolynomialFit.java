@@ -2,6 +2,8 @@ package org.jtimer.Regression;
 
 /**
  * Used to fit a set of data to polynomial
+ * 
+ * @author MagneticZero
  */
 public class PolynomialFit extends LinearRegression {
 

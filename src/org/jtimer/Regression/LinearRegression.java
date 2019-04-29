@@ -4,6 +4,8 @@ package org.jtimer.Regression;
  * An abstract class that acts as a base-line for the other forms of linear
  * regression. Has methods to compare regressions, calculate the error, and
  * setting the names and an abstract method for calculating f(x).
+ * 
+ * @author MagneticZero
  */
 public abstract class LinearRegression implements Comparable<LinearRegression> {
 

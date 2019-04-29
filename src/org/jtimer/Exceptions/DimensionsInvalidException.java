@@ -2,7 +2,9 @@ package org.jtimer.Exceptions;
 
 /**
  * Used if a matrix doesn't have the necessary dimensions to execute the task at
- * hand
+ * hand.
+ * 
+ * @author MagneticZero
  */
 public class DimensionsInvalidException extends RuntimeException {
 
