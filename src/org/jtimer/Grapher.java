@@ -34,7 +34,8 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 /**
- * The object that graphs all the data
+ * The object that graphs all the data. For all intents and purposes, this class
+ * is a Singleton class and multiple instances of it should not be run.
  * 
  * @author MagneticZero
  */
@@ -82,6 +83,12 @@ public class Grapher extends Application {
 	 */
 	public ScatterChart<Number, Number> scatterPlot = new ScatterChart<>(xAxis, yAxis);
 
+	/**
+	 * Starts the grapher by labeling the axes, adding key listeners, and various
+	 * other things that pertain to the grapher.
+	 * 
+	 * @param stage the primary stage
+	 */
 	@Override
 	public void start(Stage stage) {
 		xAxis.setLabel("Repetitions");
@@ -134,7 +141,7 @@ public class Grapher extends Application {
 
 	/**
 	 * Used to set the progress of the graph so that the user knows that something
-	 * is actually happening
+	 * is actually happening. This is formatted to only 2 decimals places.
 	 * 
 	 * @param progress The progress that has been completed
 	 */
@@ -166,7 +173,6 @@ public class Grapher extends Application {
 	 * Sets the maximum value that the graph will graph. By default this is
 	 * {@link Double#POSITIVE_INFINITY}
 	 * 
-	 * @see Double#POSITIVE_INFINITY
 	 * @param max The maximum value
 	 */
 	public void setMax(double max) {
@@ -174,8 +180,8 @@ public class Grapher extends Application {
 	}
 
 	/**
-	 * Maximum amount of deviations the graph will show by default this is 3, so
-	 * data only within 3 standard deviations will be shown.
+	 * Maximum amount of deviations the graph will show by default this is 2, so
+	 * data only within 2 standard deviations will be shown.
 	 * 
 	 * @param maxDeviations The maximum amount of deviations
 	 */
@@ -183,15 +189,28 @@ public class Grapher extends Application {
 		this.maxDeviations = maxDeviations;
 	}
 
+	/**
+	 * This sets the grapher for the Singleton grapher class
+	 * 
+	 * @param grapher0 The grapher to be set
+	 */
 	public static void setGrapher(Grapher grapher0) {
 		grapher = grapher0;
 		latch.countDown();
 	}
 
+	/**
+	 * Sets the instance of the grapher
+	 */
 	public Grapher() {
 		setGrapher(this);
 	}
 
+	/**
+	 * Starts the grapher, this is what should be used to create a grapher instance.
+	 * 
+	 * @return Returns the grapher instance created.
+	 */
 	public static Grapher start() {
 		new Thread() {
 			@Override
@@ -293,8 +312,8 @@ public class Grapher extends Application {
 	}
 
 	/**
-	 * Calculates the line of best fit using linear regression. 
-	 * <br><b>CURRENTLY AN EXPERIMENTAL FEATURE</b>
+	 * Calculates the line of best fit using linear regression. <br>
+	 * <b>CURRENTLY AN EXPERIMENTAL FEATURE</b>
 	 */
 	private void lineOfBestFit() {
 		TreeSet<LinearRegression> regressions = null;

@@ -56,7 +56,7 @@ public class Runner {
 	}
 
 	/**
-	 * Runs all @Time methods inside of the package pkg.
+	 * Runs all @{@link org.jtimer.Annotations.Time} methods inside of the package pkg.
 	 * 
 	 * @param pkg The package containing the methods to run
 	 * @throws Throwable Anything thrown from running the methods.
@@ -149,6 +149,11 @@ public class Runner {
 		}
 	}
 
+	/**
+	 * Returns the grapher being used so that the user can set the graph settings.
+	 * 
+	 * @return The graph being used
+	 */
 	public static Grapher getGrapher() {
 		return grapher;
 	}
@@ -200,7 +205,7 @@ public class Runner {
 				if (!grapher.scatterPlot.getData().contains(chart) && chart.getData().size() != 0) {
 					grapher.scatterPlot.getData().add(chart);
 				}
-			} catch (Exception e) {
+			} catch (ReflectiveOperationException e) {
 				e.printStackTrace();
 			}
 		});
@@ -218,7 +223,7 @@ public class Runner {
 	 */
 	private static CountDownLatch runWithTimeout(Method method, TimeMethod timeMethod, Series<Number, Number> data, long i, long timeout) {
 		try {
-			if (timeout == -1l) {
+			if (timeout < 0) {
 				timer = Long.MAX_VALUE;
 			} else {
 				timer = timeout;
@@ -280,7 +285,7 @@ public class Runner {
 			URL resource = resources.nextElement();
 			dirs.add(new File(resource.getFile()));
 		}
-		LinkedList<Class<?>> classes = new LinkedList<>();
+		List<Class<?>> classes = new LinkedList<>();
 		for (File directory : dirs) {
 			classes.addAll(findClasses(directory, packageName));
 		}
