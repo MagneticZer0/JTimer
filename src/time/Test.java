@@ -47,7 +47,7 @@ public class Test {
 		list.add(1.1);
 	}
 	
-	@Time(repeat = 3000)
+	@Time(repeat = 3000, name="Tim Sort")
 	public void sort() {
 		Collections.sort(list);
 	}

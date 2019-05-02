@@ -193,7 +193,11 @@ public class Runner {
 	private static void graphData(Method method, Series<Number, Number> chart, long x, long y) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 		Platform.runLater(() -> {
 			try {
+				if (method.getAnnotation(Time.class).name().equals("")) {
 				chart.setName(method.getName().substring(0, 1).toUpperCase() + method.getName().substring(1));
+				} else {
+					chart.setName(method.getAnnotation(Time.class).name());
+				}
 				Field counter = object.getClass().getDeclaredField("counter");
 				counter.setAccessible(true);
 				counter.set(object, x);

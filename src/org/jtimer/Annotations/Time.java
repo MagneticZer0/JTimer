@@ -20,4 +20,6 @@ public @interface Time {
 	int repeat() default 10;
 
 	long timeout() default -1; // In nanoseconds
+	
+	String name() default "";
 }
