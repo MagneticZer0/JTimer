@@ -25,11 +25,15 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
+import javafx.scene.effect.Light.Point;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -82,6 +86,7 @@ public class Grapher extends Application {
 	 * The actual scatter plot
 	 */
 	public ScatterChart<Number, Number> scatterPlot = new ScatterChart<>(xAxis, yAxis);
+	private Pane pane = new Pane();
 
 	/**
 	 * Starts the grapher by labeling the axes, adding key listeners, and various
@@ -103,9 +108,12 @@ public class Grapher extends Application {
 
 		scatterPlot.setTitle(graphTitle);
 
-		Scene scene = new Scene(scatterPlot, 800, 600);
+		Scene scene = new Scene(pane, 800, 600);
+		scatterPlot.prefHeightProperty().bind(scene.heightProperty());
+		scatterPlot.prefWidthProperty().bind(scene.widthProperty());
+		pane.getChildren().add(scatterPlot);
 
-		scene.setOnKeyPressed(e -> {
+		scene.setOnKeyPressed(e -> { // This is the key listener for CTRL + S
 			if (save.match(e)) {
 				FileChooser chooser = new FileChooser();
 				chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image (*.png)", "*.png"));
@@ -122,6 +130,59 @@ public class Grapher extends Application {
 
 		stage.setScene(scene);
 		stage.show();
+	}
+
+	/**
+	 * Adds a zooming feature into the scatter plot.
+	 */
+	private void addZoomer() {
+		Rectangle selection = new Rectangle(); // This is for visuals
+		Point selectionAnchor = new Point(); // This is for visuals
+		Point zoomAnchor = new Point(); // This is for the actual zoom
+
+		scatterPlot.setOnMousePressed(e -> {
+			if (e.getButton() == MouseButton.PRIMARY && e.isControlDown()) {
+				selectionAnchor.setX(e.getX());
+				selectionAnchor.setY(e.getY());
+				zoomAnchor.setX(e.getSceneX());
+				zoomAnchor.setY(e.getSceneY());
+				selection.setX(e.getX());
+				selection.setY(e.getY());
+				selection.setFill(Color.TRANSPARENT);
+				selection.setStroke(Color.BLACK);
+				selection.getStrokeDashArray().add(5.0);
+				pane.getChildren().add(selection);
+			} else if (e.getButton() == MouseButton.SECONDARY) {
+				prettifyView();
+			}
+		});
+
+		scatterPlot.setOnMouseDragged(e -> {
+			if (e.getButton() == MouseButton.PRIMARY && e.isControlDown()) {
+				selection.setWidth(Math.abs(e.getX() - selectionAnchor.getX()));
+				selection.setHeight(Math.abs(e.getY() - selectionAnchor.getY()));
+				selection.setX(Math.min(selectionAnchor.getX(), e.getX()));
+				selection.setY(Math.min(selectionAnchor.getY(), e.getY()));
+			}
+		});
+
+		scatterPlot.setOnMouseReleased(e -> {
+			if (e.getButton() == MouseButton.PRIMARY && e.isControlDown()) {
+				pane.getChildren().remove(selection);
+				if (selection.getWidth() + selection.getHeight() > 2) { // Avoides just pressing
+					selection.setWidth(0);
+					selection.setHeight(0);
+					double x1 = xAxis.getValueForDisplay(xAxis.sceneToLocal(zoomAnchor.getX(), 0).getX()).doubleValue();
+					double y1 = yAxis.getValueForDisplay(yAxis.sceneToLocal(0, zoomAnchor.getY()).getY()).doubleValue();
+					double x2 = xAxis.getValueForDisplay(xAxis.sceneToLocal(e.getSceneX(), 0).getX()).doubleValue();
+					double y2 = yAxis.getValueForDisplay(yAxis.sceneToLocal(0, e.getSceneY()).getY()).doubleValue();
+					xAxis.setLowerBound(Math.min(x1, x2));
+					xAxis.setUpperBound(Math.max(x1, x2));
+					yAxis.setLowerBound(Math.min(y1, y2));
+					yAxis.setUpperBound(Math.max(y1, y2));
+				}
+			}
+		});
 	}
 
 	/**
@@ -241,6 +302,7 @@ public class Grapher extends Application {
 			scatterPlot.setTitle(scatterPlot.getTitle().split(" - ")[0]);
 			lineOfBestFit();
 			prettifyView();
+			addZoomer();
 			for (Node node : scatterPlot.getChildrenUnmodifiable()) {
 				if (node instanceof Legend) {
 					Legend legend = (Legend) node;
