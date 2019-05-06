@@ -136,22 +136,20 @@ public class Grapher extends Application {
 	 * Adds a zooming feature into the scatter plot.
 	 */
 	private void addZoomer() {
-		Rectangle selection = new Rectangle(); // This is for visuals
-		Point selectionAnchor = new Point(); // This is for visuals
-		Point zoomAnchor = new Point(); // This is for the actual zoom
+		Rectangle selectionVisual = new Rectangle(); // This is for visuals
+		Point selection = new Point();
 
 		scatterPlot.setOnMousePressed(e -> {
 			if (e.getButton() == MouseButton.PRIMARY && e.isControlDown()) {
-				selectionAnchor.setX(e.getX());
-				selectionAnchor.setY(e.getY());
-				zoomAnchor.setX(e.getSceneX());
-				zoomAnchor.setY(e.getSceneY());
-				selection.setX(e.getX());
-				selection.setY(e.getY());
-				selection.setFill(Color.TRANSPARENT);
-				selection.setStroke(Color.BLACK);
-				selection.getStrokeDashArray().add(5.0);
-				pane.getChildren().add(selection);
+				selection.setX(e.getSceneX());
+				selection.setY(e.getSceneY());
+				selectionVisual.setX(e.getSceneX());
+				selectionVisual.setY(e.getSceneY());
+				selectionVisual.setFill(Color.TRANSPARENT);
+				selectionVisual.setStroke(Color.BLACK);
+				selectionVisual.getStrokeDashArray().add(5.0);
+				selectionVisual.setStrokeWidth(0.5);
+				pane.getChildren().add(selectionVisual);
 			} else if (e.getButton() == MouseButton.SECONDARY) {
 				prettifyView();
 			}
@@ -159,27 +157,29 @@ public class Grapher extends Application {
 
 		scatterPlot.setOnMouseDragged(e -> {
 			if (e.getButton() == MouseButton.PRIMARY && e.isControlDown()) {
-				selection.setWidth(Math.abs(e.getX() - selectionAnchor.getX()));
-				selection.setHeight(Math.abs(e.getY() - selectionAnchor.getY()));
-				selection.setX(Math.min(selectionAnchor.getX(), e.getX()));
-				selection.setY(Math.min(selectionAnchor.getY(), e.getY()));
+				selectionVisual.setWidth(Math.abs(e.getSceneX() - selection.getX()));
+				selectionVisual.setHeight(Math.abs(e.getSceneY() - selection.getY()));
+				selectionVisual.setX(Math.min(selection.getX(), e.getSceneX()));
+				selectionVisual.setY(Math.min(selection.getY(), e.getSceneY()));
 			}
 		});
 
 		scatterPlot.setOnMouseReleased(e -> {
 			if (e.getButton() == MouseButton.PRIMARY && e.isControlDown()) {
-				pane.getChildren().remove(selection);
-				if (selection.getWidth() + selection.getHeight() > 2) { // Avoides just pressing
-					selection.setWidth(0);
-					selection.setHeight(0);
-					double x1 = xAxis.getValueForDisplay(xAxis.sceneToLocal(zoomAnchor.getX(), 0).getX()).doubleValue();
-					double y1 = yAxis.getValueForDisplay(yAxis.sceneToLocal(0, zoomAnchor.getY()).getY()).doubleValue();
+				pane.getChildren().remove(selectionVisual);
+				if (selectionVisual.getWidth() + selectionVisual.getHeight() > 2) { // Avoids just pressing
+					selectionVisual.setWidth(0);
+					selectionVisual.setHeight(0);
+					double x1 = xAxis.getValueForDisplay(xAxis.sceneToLocal(selection.getX(), 0).getX()).doubleValue();
+					double y1 = yAxis.getValueForDisplay(yAxis.sceneToLocal(0, selection.getY()).getY()).doubleValue();
 					double x2 = xAxis.getValueForDisplay(xAxis.sceneToLocal(e.getSceneX(), 0).getX()).doubleValue();
 					double y2 = yAxis.getValueForDisplay(yAxis.sceneToLocal(0, e.getSceneY()).getY()).doubleValue();
-					xAxis.setLowerBound(Math.min(x1, x2));
-					xAxis.setUpperBound(Math.max(x1, x2));
-					yAxis.setLowerBound(Math.min(y1, y2));
-					yAxis.setUpperBound(Math.max(y1, y2));
+					xAxis.setLowerBound(Math.round(Math.min(x1, x2)));
+					xAxis.setUpperBound(Math.round(Math.max(x1, x2)));
+					xAxis.setTickUnit(Math.round((xAxis.getUpperBound() - xAxis.getLowerBound()) / 10));
+					yAxis.setLowerBound(Math.round(Math.min(y1, y2)));
+					yAxis.setUpperBound(Math.round(Math.max(y1, y2)));
+					yAxis.setTickUnit(Math.round((yAxis.getUpperBound() - yAxis.getLowerBound()) / 10));
 				}
 			}
 		});
