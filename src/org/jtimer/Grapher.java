@@ -7,6 +7,7 @@ import java.util.concurrent.CountDownLatch;
 
 import javax.imageio.ImageIO;
 
+import org.jtimer.Readability.If;
 import org.jtimer.Regression.FunctionalFit;
 import org.jtimer.Regression.LinearRegression;
 import org.jtimer.Regression.PolynomialFit;
@@ -86,6 +87,9 @@ public class Grapher extends Application {
 	 * The actual scatter plot
 	 */
 	public ScatterChart<Number, Number> scatterPlot = new ScatterChart<>(xAxis, yAxis);
+	/**
+	 * The pane that houses the ScatterChart {@link Grapher#scatterPlot}
+	 */
 	private Pane pane = new Pane();
 
 	/**
@@ -315,7 +319,7 @@ public class Grapher extends Application {
 										for (Data<Number, Number> data : series.getData()) {
 											if (data.getNode() != null) {
 												data.getNode().setVisible(!data.getNode().isVisible());
-												item.getSymbol().setOpacity(data.getNode().isVisible() ? 1 : 0.25);
+												item.getSymbol().setOpacity(new If<Double>(data.getNode().isVisible()).Then(1d).Else(0.25));
 											}
 										}
 										prettifyView();
@@ -364,8 +368,8 @@ public class Grapher extends Application {
 		}
 		double deviation = Math.sqrt(total / points);
 		yAxis.setAutoRanging(false);
-		yAxis.setLowerBound(Math.round(((mean - maxDeviations * deviation < 0) || (deviation == 0)) ? 0 : mean - maxDeviations * deviation));
-		yAxis.setUpperBound(Math.round((deviation != 0) ? mean + maxDeviations * deviation : 2 * mean));
+		yAxis.setLowerBound(Math.round(new If<Double>((mean - maxDeviations * deviation < 0) || (deviation == 0)).Then(0d).Else(mean-maxDeviations*deviation)));
+		yAxis.setUpperBound(Math.round(new If<Double>(deviation != 0).Then(mean + maxDeviations*deviation).Else(2*mean)));
 		yAxis.setTickUnit(Math.round((yAxis.getUpperBound() - yAxis.getLowerBound()) / 10));
 		xAxis.setAutoRanging(false);
 		xAxis.setLowerBound(0);
