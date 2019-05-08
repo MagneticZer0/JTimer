@@ -29,19 +29,19 @@ public class FunctionalFit extends LinearRegression {
 
 	/**
 	 * Creates a higher order FunctionalFit that is in the form of f(x) =
-	 * C+function(x) + ... + function(x)^degree
+	 * C+function(x) + ... + function(x)^degree-1
 	 * 
 	 * @param xs       The x data
 	 * @param ys       The y data
 	 * @param function The function to use
-	 * @param degree   The degree to use
+	 * @param terms    The number of terms
 	 */
-	public FunctionalFit(double[] xs, double[] ys, Function function, int degree) {
+	public FunctionalFit(double[] xs, double[] ys, Function function, int terms) {
 		this.function = function;
-		coefficients = new double[degree];
-		Matrix xsMatrix = new Matrix(xs.length, degree);
+		coefficients = new double[terms];
+		Matrix xsMatrix = new Matrix(xs.length, terms);
 		for (int i = 0; i < xs.length; i++) {
-			for (int j = 0; j < degree; j++) {
+			for (int j = 0; j < terms; j++) {
 				xsMatrix.toArray()[i][j] = Math.pow(function.calc(xs[i]), j);
 			}
 		}
@@ -50,7 +50,7 @@ public class FunctionalFit extends LinearRegression {
 			ysMatrix.toArray()[i][0] = ys[i];
 		}
 		Matrix solutionMatrix = xsMatrix.transpose().multiply(xsMatrix).inverse().multiply(xsMatrix.transpose().multiply(ysMatrix));
-		for (int i = 0; i < degree; i++) {
+		for (int i = 0; i < terms; i++) {
 			coefficients[i] = solutionMatrix.toArray()[i][0];
 		}
 		error(xs, ys);

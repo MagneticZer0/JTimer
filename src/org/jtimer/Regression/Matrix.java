@@ -22,7 +22,7 @@ public class Matrix {
 	 * @param i The number of rows
 	 * @param j The number of columns
 	 */
-	Matrix(int i, int j) {
+	public Matrix(int i, int j) {
 		matrix = new Double[i][j];
 		for (int iX = 0; iX < i; iX++) {
 			for (int jY = 0; jY < j; jY++) {
@@ -36,7 +36,7 @@ public class Matrix {
 	 * 
 	 * @param matrix The double[][] to transform
 	 */
-	Matrix(Number[][] matrix) {
+	public Matrix(Number[][] matrix) {
 		this(matrix.length, matrix[0].length);
 		for (int i = 0; i < matrix.length; i++) {
 			for (int j = 0; j < matrix[0].length; j++) {
@@ -51,7 +51,7 @@ public class Matrix {
 	 * @param other The matrix to add
 	 * @return The result
 	 */
-	Matrix add(Matrix other) {
+	public Matrix add(Matrix other) {
 		if (matrix.length != other.matrix.length || matrix[0].length != other.matrix[0].length) {
 			throw new DimensionsInvalidException();
 		}
@@ -70,7 +70,7 @@ public class Matrix {
 	 * @param other The matrix to subtract
 	 * @return The result
 	 */
-	Matrix subtract(Matrix other) {
+	public Matrix subtract(Matrix other) {
 		if (matrix.length != other.matrix.length || matrix[0].length != other.matrix[0].length) {
 			throw new DimensionsInvalidException();
 		}
@@ -89,7 +89,7 @@ public class Matrix {
 	 * @param other The scalar to multiply by
 	 * @return The result
 	 */
-	Matrix scalarMultiply(Double other) {
+	public Matrix scalarMultiply(Double other) {
 		Double[][] result = new Matrix(matrix.length, matrix[0].length).toArray();
 		for (int i = 0; i < matrix.length; i++) {
 			for (int j = 0; j < matrix[0].length; j++) {
@@ -105,7 +105,7 @@ public class Matrix {
 	 * @param other The matrix to multiply
 	 * @return The result
 	 */
-	Matrix multiply(Matrix other) {
+	public Matrix multiply(Matrix other) {
 		if (this.matrix[0].length != other.matrix.length) {
 			throw new DimensionsInvalidException();
 		} else {
@@ -126,7 +126,7 @@ public class Matrix {
 	 * 
 	 * @return The transposed matrix
 	 */
-	Matrix transpose() {
+	public Matrix transpose() {
 		Double[][] result = new Matrix(matrix[0].length, matrix.length).toArray();
 		for (int i = 0; i < matrix.length; i++) {
 			for (int j = 0; j < matrix[0].length; j++) {
@@ -141,7 +141,7 @@ public class Matrix {
 	 * 
 	 * @return The inverted matrix
 	 */
-	Matrix inverse() {
+	public Matrix inverse() {
 		Double[][] result = new Matrix(matrix.length, matrix.length).toArray();
 		for (int i = 0; i < matrix.length; i++) {
 			for (int j = 0; j < matrix.length; j++) {
@@ -160,18 +160,18 @@ public class Matrix {
 	}
 
 	/**
-	 * Calculates the determinant of the matrix and returns in
+	 * Calculates the determinant of the matrix and returns it
 	 * 
 	 * @return The determinant
 	 */
-	Double determinant() {
+	public Double determinant() {
 		if (matrix.length == matrix[0].length) {
 			if (matrix.length == 1) {
 				return matrix[0][0];
 			} else {
 				Double determinant = 0d;
 				for (int i = 0; i < matrix.length; i++) {
-					determinant += Math.pow(-1, i) * matrix[0][i] * coFactor(i).determinant();
+					determinant += Math.pow(-1, i) * matrix[0][i] * minorMatrix(0, i).determinant();
 				}
 				return determinant;
 			}
@@ -181,36 +181,13 @@ public class Matrix {
 	}
 
 	/**
-	 * Used by the determinant method
-	 * 
-	 * @param c The column to eleminate
-	 * @return The cofactor matrix
-	 */
-	private Matrix coFactor(int c) {
-		Double[][] coFactor = new Double[matrix.length - 1][matrix.length - 1];
-		int i = 0, j = 0;
-		for (int row = 0; row < matrix.length; row++) {
-			for (int col = 0; col < matrix[0].length; col++) {
-				if (row != 0 && col != c) {
-					coFactor[i][j++] = matrix[row][col];
-					if (j == matrix.length - 1) {
-						j = 0;
-						i++;
-					}
-				}
-			}
-		}
-		return new Matrix(coFactor);
-	}
-
-	/**
-	 * Used by inverse to get the smaller submatrix
+	 * Used to get a smaller sub-matrix by eliminating a row and column number
 	 * 
 	 * @param row The row to exclude
 	 * @param col The column to exlude
 	 * @return The submatrix
 	 */
-	Matrix minorMatrix(int row, int col) {
+	public Matrix minorMatrix(int row, int col) {
 		Double[][] result = new Matrix(matrix.length - 1, matrix.length - 1).toArray();
 		for (int i = 0; i < matrix.length; i++) {
 			for (int j = 0; i != row && j < matrix.length; j++) {
@@ -238,7 +215,7 @@ public class Matrix {
 	 * 
 	 * @return The Double[][] representing the matrix
 	 */
-	Double[][] toArray() {
+	public Double[][] toArray() {
 		return matrix.clone();
 	}
 }

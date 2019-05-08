@@ -24,11 +24,11 @@ public class PolynomialFit extends LinearRegression {
 
 	/**
 	 * Creates a higher order PolynomialFit that is in the form of f(x) = C+x + ...
-	 * + x^degree
+	 * + x^terms-1
 	 * 
 	 * @param xs    The x data
 	 * @param ys    The y data
-	 * @param terms The degree to use
+	 * @param terms The number of terms
 	 */
 	public PolynomialFit(double[] xs, double[] ys, int terms) {
 		coefficients = new double[terms];

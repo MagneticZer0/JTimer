@@ -8,11 +8,13 @@ import javafx.scene.chart.XYChart.Series;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
@@ -94,7 +96,9 @@ public class Runner {
 	public static void time(String pkg, TimeMethod timeMethod) throws Throwable {
 		for (Class<?> cls : getClasses(pkg)) {
 			if (isInstantiable(cls)) {
-				object = cls.newInstance();
+				Constructor<?> constructor = cls.getDeclaredConstructor(null); // This is to access any protected classes
+				constructor.setAccessible(true);
+				object = constructor.newInstance(null); //
 				List<Method> beforeClass = new LinkedList<>();
 				List<Method> before = new LinkedList<>();
 				List<Method> time = new LinkedList<>();
@@ -198,9 +202,11 @@ public class Runner {
 				} else {
 					chart.setName(method.getAnnotation(Time.class).name());
 				}
-				Field counter = object.getClass().getDeclaredField("counter");
-				counter.setAccessible(true);
-				counter.set(object, x);
+				if (Arrays.stream(object.getClass().getDeclaredFields()).anyMatch(field -> field.getName().equals("counter"))) {
+					Field counter = object.getClass().getDeclaredField("counter");
+					counter.setAccessible(true);
+					counter.set(object, x);
+				}
 				Field graphMax = grapher.getClass().getDeclaredField("max");
 				graphMax.setAccessible(true);
 				if (y < ((double) graphMax.get(grapher))) {
@@ -241,7 +247,9 @@ public class Runner {
 					long startTime = timeMethod.timeMethod();
 					method.invoke(object);
 					time.interrupt();
-					graphData(method, data, i, timeMethod.timeMethod() - startTime);
+					if (!Thread.interrupted()) {
+						graphData(method, data, i, timeMethod.timeMethod() - startTime);
+					}
 					latch.countDown();
 				} catch (ReflectiveOperationException | BrokenBarrierException e) {
 					// Ignore any exceptions related to reflection or barriers
@@ -255,7 +263,9 @@ public class Runner {
 					long milliseconds = (long) Math.floor(timer / 1000000);
 					Thread.sleep(milliseconds, (int) (timer - milliseconds * 1000000));
 					runnable.interrupt();
-					graphData(method, data, i, timeMethod.convertNano(timer));
+					if (!Thread.interrupted()) {
+						graphData(method, data, i, timeMethod.convertNano(timer));
+					}
 					latch.countDown();
 				} catch (Exception e) {
 					// Do nothing for now
