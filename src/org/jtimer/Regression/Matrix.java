@@ -198,6 +198,20 @@ public class Matrix {
 		}
 		return new Matrix(result);
 	}
+	
+	/**
+	 * Creates an identity matrix that is size x size large.
+	 * 
+	 * @param size The size of the identity matrix
+	 * @return Returns the newly created identity matrix.
+	 */
+	public static Matrix identity(int size) {
+		Double[][] result = new Matrix(size, size).toArray();
+		for (int i = 0; i < result.length; i++) {
+			result[i][i] = 1d;
+		}
+		return new Matrix(result);
+	}
 
 	/**
 	 * Returns the Matrix as a string

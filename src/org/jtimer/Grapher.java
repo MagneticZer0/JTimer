@@ -122,10 +122,13 @@ public class Grapher extends Application {
 				FileChooser chooser = new FileChooser();
 				chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image (*.png)", "*.png"));
 				chooser.setTitle("Select where to save the graph...");
+				chooser.setInitialDirectory(new File(System.getProperty("user.home") + "/Desktop"));
 				File output = chooser.showSaveDialog(stage);
 				WritableImage image = scatterPlot.snapshot(new SnapshotParameters(), null);
 				try {
-					ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", output);
+					if (output != null) {
+						ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", output);
+					}
 				} catch (IOException ex) {
 					ex.printStackTrace();
 				}
@@ -196,12 +199,14 @@ public class Grapher extends Application {
 	 * @param graphTitle The title to set it to
 	 */
 	public void setGraphTitle(String graphTitle) {
-		this.graphTitle = graphTitle;
-		scatterPlot.setTitle(graphTitle);
-		if (isRunning) {
-			this.graphTitle += " - ";
-			scatterPlot.setTitle(scatterPlot.getTitle() + " - ");
-		}
+		Platform.runLater(() -> {
+			this.graphTitle = graphTitle;
+			scatterPlot.setTitle(graphTitle);
+			if (isRunning) {
+				this.graphTitle += " - ";
+				scatterPlot.setTitle(scatterPlot.getTitle() + " - ");
+			}
+		});
 	}
 
 	/**
@@ -222,7 +227,9 @@ public class Grapher extends Application {
 	 * @param xDesc The string for the x-axis
 	 */
 	public void setxDesc(String xDesc) {
-		xAxis.setLabel(xDesc);
+		Platform.runLater(() -> {
+			xAxis.setLabel(xDesc);
+		});
 	}
 
 	/**
@@ -231,7 +238,9 @@ public class Grapher extends Application {
 	 * @param yDesc The string for the y-axis
 	 */
 	public void setyDesc(String yDesc) {
-		yAxis.setLabel(yDesc);
+		Platform.runLater(() -> {
+			yAxis.setLabel(yDesc);
+		});
 	}
 
 	/**

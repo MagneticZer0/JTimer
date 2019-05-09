@@ -96,9 +96,9 @@ public class Runner {
 	public static void time(String pkg, TimeMethod timeMethod) throws Throwable {
 		for (Class<?> cls : getClasses(pkg)) {
 			if (isInstantiable(cls)) {
-				Constructor<?> constructor = cls.getDeclaredConstructor(null); // This is to access any protected classes
+				Constructor<?> constructor = cls.getDeclaredConstructor(); // This is to access any protected classes
 				constructor.setAccessible(true);
-				object = constructor.newInstance(null); //
+				object = constructor.newInstance(); //
 				List<Method> beforeClass = new LinkedList<>();
 				List<Method> before = new LinkedList<>();
 				List<Method> time = new LinkedList<>();
