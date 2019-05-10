@@ -142,21 +142,25 @@ public class Matrix {
 	 * @return The inverted matrix
 	 */
 	public Matrix inverse() {
-		Double[][] result = new Matrix(matrix.length, matrix.length).toArray();
-		for (int i = 0; i < matrix.length; i++) {
-			for (int j = 0; j < matrix.length; j++) {
-				result[i][j] = Math.pow(-1, i + j) * minorMatrix(i, j).determinant();
+		if (matrix.length == matrix[0].length) {
+			Double[][] result = new Matrix(matrix.length, matrix.length).toArray();
+			for (int i = 0; i < matrix.length; i++) {
+				for (int j = 0; j < matrix.length; j++) {
+					result[i][j] = Math.pow(-1, i + j) * minorMatrix(i, j).determinant();
+				}
 			}
-		}
-		double num = 1.0 / determinant();
-		for (int i = 0; i < matrix.length; i++) {
-			for (int j = 0; j <= i; j++) {
-				double temp = result[i][j];
-				result[i][j] = result[j][i] * num;
-				result[j][i] = temp * num;
+			double num = 1.0 / determinant();
+			for (int i = 0; i < matrix.length; i++) {
+				for (int j = 0; j <= i; j++) {
+					double temp = result[i][j];
+					result[i][j] = result[j][i] * num;
+					result[j][i] = temp * num;
+				}
 			}
+			return new Matrix(result);
+		} else {
+			throw new DimensionsInvalidException();
 		}
-		return new Matrix(result);
 	}
 
 	/**

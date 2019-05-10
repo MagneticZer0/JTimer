@@ -48,6 +48,10 @@ public class Runner {
 	 * The timer to track timeout
 	 */
 	private static long timer = -1l;
+	/**
+	 * Used if someone wants to await the runner
+	 */
+	private static CountDownLatch latch = new CountDownLatch(2);
 
 	/**
 	 * Since everything is static there is no need to be able to instantiate a new
@@ -151,6 +155,7 @@ public class Runner {
 				graphFinish();
 			}
 		}
+		latch.countDown();
 	}
 
 	/**
@@ -218,6 +223,7 @@ public class Runner {
 			} catch (ReflectiveOperationException e) {
 				e.printStackTrace();
 			}
+			latch.countDown();
 		});
 	}
 
@@ -278,6 +284,16 @@ public class Runner {
 		} catch (InterruptedException | BrokenBarrierException e) {
 			return new CountDownLatch(0);
 		}
+	}
+	
+	/**
+	 * Provides a method that allows one to wait for the runner to execute all
+	 * things that need timing if they want to execute more things after it.
+	 * 
+	 * @throws InterruptedException If the latch throws an InterruptedException
+	 */
+	public static void await() throws InterruptedException {
+		latch.await();
 	}
 
 	/**
