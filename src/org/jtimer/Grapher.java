@@ -91,6 +91,10 @@ public class Grapher extends Application {
 	 * The pane that houses the ScatterChart {@link Grapher#scatterPlot}
 	 */
 	private Pane pane = new Pane();
+	/**
+	 * The latch that you can await
+	 */
+	private CountDownLatch await = new CountDownLatch(1);
 
 	/**
 	 * Starts the grapher by labeling the axes, adding key listeners, and various
@@ -214,10 +218,11 @@ public class Grapher extends Application {
 	 * is actually happening. This is formatted to only 2 decimals places.
 	 * 
 	 * @param progress The progress that has been completed
+	 * @param warmup   If this is triggered by the warmup
 	 */
-	public void setProgress(Double progress) {
+	public void setProgress(Double progress, boolean warmup) {
 		Platform.runLater(() -> {
-			scatterPlot.setTitle(graphTitle + String.format("%3.2f", progress * 100) + "%");
+			scatterPlot.setTitle(graphTitle + new If<String>(warmup).Then(" Warmup ").Else("") + String.format("%3.2f", progress * 100) + "%");
 		});
 	}
 
@@ -299,6 +304,14 @@ public class Grapher extends Application {
 		}
 		return grapher;
 	}
+	
+	/**
+	 * Awaits the grapher to finish everything
+	 * @throws InterruptedException If the latch throws an exception
+	 */
+	public void await() throws InterruptedException {
+		await.await();
+	}
 
 	/**
 	 * Finishes a graph by:
@@ -340,6 +353,7 @@ public class Grapher extends Application {
 					}
 				}
 			}
+			await.countDown();
 		});
 
 	}

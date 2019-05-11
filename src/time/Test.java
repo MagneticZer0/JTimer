@@ -7,7 +7,9 @@ import org.jtimer.Runner;
 import org.jtimer.Annotations.Before;
 import org.jtimer.Annotations.BeforeClass;
 import org.jtimer.Annotations.Time;
+import org.jtimer.Annotations.Warmup;
 
+@Warmup(iterations = 500)
 public class Test {
 	
 	long counter = 0; // If you want some variable to keep the repitition that you're on.

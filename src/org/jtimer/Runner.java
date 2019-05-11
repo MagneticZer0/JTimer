@@ -16,6 +16,7 @@ import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.BrokenBarrierException;
@@ -62,10 +63,12 @@ public class Runner {
 	}
 
 	/**
-	 * Runs all @{@link org.jtimer.Annotations.Time} methods inside of the package pkg.
+	 * Runs all @{@link org.jtimer.Annotations.Time} methods inside of the package
+	 * pkg. See {@link org.jtimer.Runner#time(String, TimeMethod)} for a more
+	 * detailed method that does the same thing.
 	 * 
-	 * @param pkg The package containing the methods to run
-	 * @throws Throwable Anything thrown from running the methods.
+	 * @param pkg The package name that contains the things you want to time
+	 * @throws Throwable Any exceptions not handled will be thrown
 	 */
 	public static void time(String pkg) throws Throwable {
 		time(pkg, new TimeMethod() {
@@ -84,9 +87,12 @@ public class Runner {
 	}
 
 	/**
-	 * This will execute all methods found in the timing package The order of
-	 * operations is anything with a @{@link org.jtimer.Annotations.BeforeClass}
-	 * which is only once. Then @{@link org.jtimer.Annotations.Before} is executed
+	 * This will execute all methods found in the timing package. If the class has
+	 * a @{@link org.jtimer.Annotations.Warmup} then all methods with
+	 * the @{@link org.jtimer.Annotations.Time} will be executed by the runner a
+	 * predefined amount of times. The order of operations is anything with
+	 * a @{@link org.jtimer.Annotations.BeforeClass} which is only once.
+	 * Then @{@link org.jtimer.Annotations.Before} is executed
 	 * before @{@link org.jtimer.Annotations.Time}, just like
 	 * JUnit @{@link org.jtimer.Annotations.Time} will execute followed
 	 * by @{@link org.jtimer.Annotations.After}.
@@ -103,6 +109,7 @@ public class Runner {
 				Constructor<?> constructor = cls.getDeclaredConstructor(); // This is to access any protected classes
 				constructor.setAccessible(true);
 				object = constructor.newInstance(); //
+				warmup(constructor.newInstance(), timeMethod); // So instance variables are left default
 				List<Method> beforeClass = new LinkedList<>();
 				List<Method> before = new LinkedList<>();
 				List<Method> time = new LinkedList<>();
@@ -139,13 +146,13 @@ public class Runner {
 							bef.setAccessible(true);
 							bef.invoke(object);
 						}
-						runWithTimeout(method, timeMethod, data, i, method.getAnnotation(Time.class).timeout()).await();
+						runWithTimeout(method, timeMethod, data, i, method.getAnnotation(Time.class).timeout(), object, false).await();
 						for (Method aft : after) {
 							aft.setAccessible(true);
 							aft.invoke(object);
 						}
 						times++;
-						grapher.setProgress(((double) times / repetitions));
+						grapher.setProgress((double) times / repetitions, false);
 					}
 				}
 				for (Method method : afterClass) {
@@ -168,21 +175,162 @@ public class Runner {
 	}
 
 	/**
-	 * Finishes a graph by executing the {@link Grapher#finish()} method.
+	 * Provides a method that allows one to wait for the runner to execute all
+	 * things that need timing if they want to execute more things after it.
 	 * 
-	 * @throws NoSuchFieldException      If the field doesn't exist
-	 * @throws SecurityException         If there is a Security Manager encounters
-	 *                                   something
-	 * @throws NoSuchMethodException     If the method doesn't exist
-	 * @throws IllegalAccessException    If you're not allowed to access something
-	 * @throws IllegalArgumentException  If the arguments given are not correct
-	 * @throws InvocationTargetException If you're invoking the method on an
-	 *                                   incorrect object
+	 * @throws InterruptedException If the latch throws an InterruptedException
 	 */
-	private static void graphFinish() throws NoSuchFieldException, SecurityException, NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		Method graphFinish = grapher.getClass().getDeclaredMethod("finish");
-		graphFinish.setAccessible(true);
-		graphFinish.invoke(grapher);
+	public static void await() throws InterruptedException {
+		latch.await();
+		grapher.await();
+		Thread.sleep(1000); // Wait until everything is properly graphed
+	}
+
+	/**
+	 * Executed to warmup all the methods and your CPU, if you want. The class needs
+	 * the @{@link org.jtimer.Annotations.Warmup} annotation present in order for
+	 * this to be run. If present, it will run
+	 * all @{@link org.jtimer.Annotations.Time} annotated methods the defined amount
+	 * of times. This also handles all the class static variables by keeping track
+	 * of them and resetting them after the warmup has been executed back to the
+	 * initial values. It basically does all the same things
+	 * {@link org.jtimer.Runner#time(String)}
+	 * 
+	 * @param obj        The object to use
+	 * @param timeMethod The functional interface for timing however you want
+	 * @throws IllegalArgumentException  If the proper arguments are not given
+	 * @throws IllegalAccessException    If a method/field is not accessible
+	 * @throws InvocationTargetException If the method called throws an exception
+	 * @throws NoSuchFieldException      If a field doesn't exist
+	 * @throws SecurityException         If the security manager throws an exception
+	 * @throws InterruptedException      If the latches/barriers throw an exception
+	 */
+	private static void warmup(Object obj, TimeMethod timeMethod) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, NoSuchFieldException, SecurityException, InterruptedException {
+		if (obj.getClass().isAnnotationPresent(Warmup.class)) {
+			HashMap<Field, Object> staticFieldValues = new HashMap<>(); // Since static fields are shared, we need to keep track of the values
+			for(Field field : obj.getClass().getDeclaredFields()) {
+				if (Modifier.isStatic(field.getModifiers()) && !Modifier.isFinal(field.getModifiers())) {
+					field.setAccessible(true);
+					staticFieldValues.put(field, field.get(null));
+				}
+			}
+			List<Method> beforeClass = new LinkedList<>();
+			List<Method> before = new LinkedList<>();
+			List<Method> time = new LinkedList<>();
+			List<Method> after = new LinkedList<>();
+			List<Method> afterClass = new LinkedList<>();
+			for (Method method : obj.getClass().getDeclaredMethods()) {
+				if (method.isAnnotationPresent(BeforeClass.class)) {
+					beforeClass.add(method);
+				}
+				if (method.isAnnotationPresent(Before.class)) {
+					before.add(method);
+				}
+				if (method.isAnnotationPresent(AfterClass.class)) {
+					afterClass.add(method);
+				}
+				if (method.isAnnotationPresent(After.class)) {
+					after.add(method);
+				}
+				if (method.isAnnotationPresent(Time.class)) {
+					time.add(method);
+				}
+			}
+			for (Method method : beforeClass) {
+				method.setAccessible(true);
+				method.invoke(obj);
+			}
+			long warmup = 0;
+			long total = obj.getClass().getAnnotation(Warmup.class).iterations()*time.size();
+			for (Method method : time) {
+				for (int i = 0; i < obj.getClass().getAnnotation(Warmup.class).iterations(); i++) {
+					for (Method bef : before) {
+						bef.setAccessible(true);
+						bef.invoke(obj);
+					}
+					if (Arrays.stream(obj.getClass().getDeclaredFields()).anyMatch(field -> field.getName().equals("counter"))) {
+						Field counter = obj.getClass().getDeclaredField("counter");
+						counter.setAccessible(true);
+						counter.set(obj, i);
+					}
+					runWithTimeout(method, timeMethod, null, i, method.getAnnotation(Time.class).timeout(), obj, true).await();
+					for (Method aft : after) {
+						aft.setAccessible(true);
+						aft.invoke(obj);
+					}
+					warmup++;
+					grapher.setProgress((double) warmup / total, true);
+				}
+			}
+			for (Method method : afterClass) {
+				method.setAccessible(true);
+				method.invoke(obj);
+			}
+			for(Field field : staticFieldValues.keySet()) {
+				field.set(null, staticFieldValues.get(field)); // Reset all static values
+			}
+		}
+	}
+
+	/**
+	 * Runs a method with a given timeout
+	 * 
+	 * @param method     The method to run
+	 * @param timeMethod The time method to use to time it
+	 * @param data       The series to add the data to
+	 * @param i          The current repetition
+	 * @param timeout    The timeout, in milliseconds
+	 * @param obj        The object to execute to use
+	 * @param warmup     If this is a warmup
+	 * @return A countdown latch so that the timer can wait
+	 */
+	private static CountDownLatch runWithTimeout(Method method, TimeMethod timeMethod, Series<Number, Number> data, long i, long timeout, Object obj, boolean warmup) {
+		try {
+			if (timeout < 0) {
+				timer = Long.MAX_VALUE;
+			} else {
+				timer = timeout;
+			}
+			CountDownLatch latch = new CountDownLatch(1);
+			CyclicBarrier gate = new CyclicBarrier(3);
+			Thread runnable = new Thread(() -> {
+				try {
+					gate.await();
+					method.setAccessible(true);
+					long startTime = timeMethod.timeMethod();
+					method.invoke(obj);
+					time.interrupt();
+					if (!Thread.interrupted() && !warmup) {
+						graphData(method, data, i, timeMethod.timeMethod() - startTime);
+					}
+					latch.countDown();
+				} catch (ReflectiveOperationException | BrokenBarrierException e) {
+					// Ignore any exceptions related to reflection or barriers
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			});
+			time = new Thread(() -> {
+				try {
+					gate.await();
+					long milliseconds = (long) Math.floor(timer / 1000000);
+					Thread.sleep(milliseconds, (int) (timer - milliseconds * 1000000));
+					runnable.interrupt();
+					if (!Thread.interrupted() && !warmup) {
+						graphData(method, data, i, timeMethod.convertNano(timer));
+					}
+					latch.countDown();
+				} catch (Exception e) {
+					// Do nothing for now
+				}
+			});
+			runnable.start();
+			time.start();
+			gate.await();
+			return latch;
+		} catch (InterruptedException | BrokenBarrierException e) {
+			return new CountDownLatch(0);
+		}
 	}
 
 	/**
@@ -228,72 +376,21 @@ public class Runner {
 	}
 
 	/**
-	 * Runs a method with a given timeout
+	 * Finishes a graph by executing the {@link Grapher#finish()} method.
 	 * 
-	 * @param method     The method to run
-	 * @param timeMethod The time method to use to time it
-	 * @param data       The series to add the data to
-	 * @param i          The current repetition
-	 * @param timeout    The timeout, in milliseconds
-	 * @return A countdown latch so that the timer can wait
+	 * @throws NoSuchFieldException      If the field doesn't exist
+	 * @throws SecurityException         If there is a Security Manager encounters
+	 *                                   something
+	 * @throws NoSuchMethodException     If the method doesn't exist
+	 * @throws IllegalAccessException    If you're not allowed to access something
+	 * @throws IllegalArgumentException  If the arguments given are not correct
+	 * @throws InvocationTargetException If you're invoking the method on an
+	 *                                   incorrect object
 	 */
-	private static CountDownLatch runWithTimeout(Method method, TimeMethod timeMethod, Series<Number, Number> data, long i, long timeout) {
-		try {
-			if (timeout < 0) {
-				timer = Long.MAX_VALUE;
-			} else {
-				timer = timeout;
-			}
-			CountDownLatch latch = new CountDownLatch(1);
-			CyclicBarrier gate = new CyclicBarrier(3);
-			Thread runnable = new Thread(() -> {
-				try {
-					gate.await();
-					method.setAccessible(true);
-					long startTime = timeMethod.timeMethod();
-					method.invoke(object);
-					time.interrupt();
-					if (!Thread.interrupted()) {
-						graphData(method, data, i, timeMethod.timeMethod() - startTime);
-					}
-					latch.countDown();
-				} catch (ReflectiveOperationException | BrokenBarrierException e) {
-					// Ignore any exceptions related to reflection or barriers
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			});
-			time = new Thread(() -> {
-				try {
-					gate.await();
-					long milliseconds = (long) Math.floor(timer / 1000000);
-					Thread.sleep(milliseconds, (int) (timer - milliseconds * 1000000));
-					runnable.interrupt();
-					if (!Thread.interrupted()) {
-						graphData(method, data, i, timeMethod.convertNano(timer));
-					}
-					latch.countDown();
-				} catch (Exception e) {
-					// Do nothing for now
-				}
-			});
-			runnable.start();
-			time.start();
-			gate.await();
-			return latch;
-		} catch (InterruptedException | BrokenBarrierException e) {
-			return new CountDownLatch(0);
-		}
-	}
-	
-	/**
-	 * Provides a method that allows one to wait for the runner to execute all
-	 * things that need timing if they want to execute more things after it.
-	 * 
-	 * @throws InterruptedException If the latch throws an InterruptedException
-	 */
-	public static void await() throws InterruptedException {
-		latch.await();
+	private static void graphFinish() throws NoSuchFieldException, SecurityException, NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		Method graphFinish = grapher.getClass().getDeclaredMethod("finish");
+		graphFinish.setAccessible(true);
+		graphFinish.invoke(grapher);
 	}
 
 	/**
