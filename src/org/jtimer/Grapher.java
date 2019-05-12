@@ -419,7 +419,7 @@ public class Grapher extends Application {
 			for (LinearRegression reg : fit) {
 				regressions.add(reg);
 			}
-			regressions.first();
+			//series.setName(series.getName() + " " + regressions.first());
 		}
 	}
 

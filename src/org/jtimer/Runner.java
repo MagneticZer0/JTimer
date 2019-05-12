@@ -1,6 +1,7 @@
 package org.jtimer;
 
 import org.jtimer.Annotations.*;
+import org.jtimer.Collections.MultiMap;
 
 import javafx.application.Platform;
 import javafx.scene.chart.XYChart;
@@ -53,6 +54,7 @@ public class Runner {
 	 * Used if someone wants to await the runner
 	 */
 	private static CountDownLatch latch = new CountDownLatch(2);
+	private static MultiMap<Method> methods = new MultiMap<>();
 
 	/**
 	 * Since everything is static there is no need to be able to instantiate a new
@@ -109,45 +111,28 @@ public class Runner {
 				Constructor<?> constructor = cls.getDeclaredConstructor(); // This is to access any protected classes
 				constructor.setAccessible(true);
 				object = constructor.newInstance(); //
-				warmup(constructor.newInstance(), timeMethod); // So instance variables are left default
-				List<Method> beforeClass = new LinkedList<>();
-				List<Method> before = new LinkedList<>();
-				List<Method> time = new LinkedList<>();
-				List<Method> after = new LinkedList<>();
-				List<Method> afterClass = new LinkedList<>();
 				long repetitions = 0;
 				for (Method method : cls.getDeclaredMethods()) {
-					if (method.isAnnotationPresent(BeforeClass.class)) {
-						beforeClass.add(method);
-					}
-					if (method.isAnnotationPresent(Before.class)) {
-						before.add(method);
-					}
-					if (method.isAnnotationPresent(AfterClass.class)) {
-						afterClass.add(method);
-					}
-					if (method.isAnnotationPresent(After.class)) {
-						after.add(method);
-					}
+					methods.put(method.getAnnotations(), method);
 					if (method.isAnnotationPresent(Time.class)) {
-						time.add(method);
 						repetitions += method.getAnnotation(Time.class).repeat();
 					}
 				}
-				for (Method method : beforeClass) {
+				warmup(constructor.newInstance(), timeMethod); // So instance variables are left default
+				for (Method method : methods.get(BeforeClass.class)) {
 					method.setAccessible(true);
 					method.invoke(object);
 				}
 				long times = 0;
-				for (Method method : time) {
+				for (Method method : methods.get(Time.class)) {
 					Series<Number, Number> data = new Series<>();
 					for (int i = 1; i <= method.getAnnotation(Time.class).repeat(); i++) {
-						for (Method bef : before) {
+						for (Method bef : methods.get(Before.class)) {
 							bef.setAccessible(true);
 							bef.invoke(object);
 						}
 						runWithTimeout(method, timeMethod, data, i, method.getAnnotation(Time.class).timeout(), object, false).await();
-						for (Method aft : after) {
+						for (Method aft : methods.get(After.class)) {
 							aft.setAccessible(true);
 							aft.invoke(object);
 						}
@@ -155,7 +140,7 @@ public class Runner {
 						grapher.setProgress((double) times / repetitions, false);
 					}
 				}
-				for (Method method : afterClass) {
+				for (Method method : methods.get(AfterClass.class)) {
 					method.setAccessible(true);
 					method.invoke(object);
 				}
@@ -214,37 +199,15 @@ public class Runner {
 					staticFieldValues.put(field, field.get(null));
 				}
 			}
-			List<Method> beforeClass = new LinkedList<>();
-			List<Method> before = new LinkedList<>();
-			List<Method> time = new LinkedList<>();
-			List<Method> after = new LinkedList<>();
-			List<Method> afterClass = new LinkedList<>();
-			for (Method method : obj.getClass().getDeclaredMethods()) {
-				if (method.isAnnotationPresent(BeforeClass.class)) {
-					beforeClass.add(method);
-				}
-				if (method.isAnnotationPresent(Before.class)) {
-					before.add(method);
-				}
-				if (method.isAnnotationPresent(AfterClass.class)) {
-					afterClass.add(method);
-				}
-				if (method.isAnnotationPresent(After.class)) {
-					after.add(method);
-				}
-				if (method.isAnnotationPresent(Time.class)) {
-					time.add(method);
-				}
-			}
-			for (Method method : beforeClass) {
+			for (Method method : methods.get(BeforeClass.class)) {
 				method.setAccessible(true);
 				method.invoke(obj);
 			}
 			long warmup = 0;
-			long total = obj.getClass().getAnnotation(Warmup.class).iterations()*time.size();
-			for (Method method : time) {
+			long total = obj.getClass().getAnnotation(Warmup.class).iterations()*methods.get(Time.class).size();
+			for (Method method : methods.get(Time.class)) {
 				for (int i = 0; i < obj.getClass().getAnnotation(Warmup.class).iterations(); i++) {
-					for (Method bef : before) {
+					for (Method bef : methods.get(Before.class)) {
 						bef.setAccessible(true);
 						bef.invoke(obj);
 					}
@@ -254,7 +217,7 @@ public class Runner {
 						counter.set(obj, i);
 					}
 					runWithTimeout(method, timeMethod, null, i, method.getAnnotation(Time.class).timeout(), obj, true).await();
-					for (Method aft : after) {
+					for (Method aft : methods.get(After.class)) {
 						aft.setAccessible(true);
 						aft.invoke(obj);
 					}
@@ -262,7 +225,7 @@ public class Runner {
 					grapher.setProgress((double) warmup / total, true);
 				}
 			}
-			for (Method method : afterClass) {
+			for (Method method : methods.get(AfterClass.class)) {
 				method.setAccessible(true);
 				method.invoke(obj);
 			}
