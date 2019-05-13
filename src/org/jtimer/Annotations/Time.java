@@ -12,9 +12,6 @@ import java.lang.annotation.*;
  * The timeout is in nanosecond and a test will be be halted after the timeout
  * has been reached.
  * 
- * {@link Time#name()} Has a name, by default the name will be the method name,
- * although this can be overwritten by using this
- * 
  * @author MagneticZero
  */
 @Retention(RetentionPolicy.RUNTIME)
@@ -23,6 +20,4 @@ public @interface Time {
 	int repeat() default 10;
 
 	long timeout() default -1; // In nanoseconds
-	
-	String name() default "";
 }

@@ -54,6 +54,9 @@ public class Runner {
 	 * Used if someone wants to await the runner
 	 */
 	private static CountDownLatch latch = new CountDownLatch(2);
+	/**
+	 * A multimap of methods that the Runner will execute.
+	 */
 	private static MultiMap<Method> methods = new MultiMap<>();
 
 	/**
@@ -313,10 +316,10 @@ public class Runner {
 	private static void graphData(Method method, Series<Number, Number> chart, long x, long y) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 		Platform.runLater(() -> {
 			try {
-				if (method.getAnnotation(Time.class).name().equals("")) {
-				chart.setName(method.getName().substring(0, 1).toUpperCase() + method.getName().substring(1));
+				if (!method.isAnnotationPresent(DisplayName.class)) {
+					chart.setName(method.getName().substring(0, 1).toUpperCase() + method.getName().substring(1));
 				} else {
-					chart.setName(method.getAnnotation(Time.class).name());
+					chart.setName(method.getAnnotation(DisplayName.class).value());
 				}
 				if (Arrays.stream(object.getClass().getDeclaredFields()).anyMatch(field -> field.getName().equals("counter"))) {
 					Field counter = object.getClass().getDeclaredField("counter");
