@@ -1,7 +1,9 @@
 package org.jtimer;
 
 import org.jtimer.Annotations.*;
+import org.jtimer.Annotations.Handler.AnnotationHandler;
 import org.jtimer.Collections.MultiMap;
+import org.jtimer.Misc.Setting;
 
 import javafx.application.Platform;
 import javafx.scene.chart.XYChart;
@@ -23,6 +25,7 @@ import java.util.List;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
+import java.util.stream.IntStream;
 
 /**
  * The brains behind everything I'd say. This is what times methods, adds
@@ -116,9 +119,10 @@ public class Runner {
 				object = constructor.newInstance(); //
 				long repetitions = 0;
 				for (Method method : cls.getDeclaredMethods()) {
-					methods.put(method.getAnnotations(), method);
-					if (method.isAnnotationPresent(Time.class)) {
-						repetitions += method.getAnnotation(Time.class).repeat();
+					AnnotationHandler methodHandler = new AnnotationHandler(method);
+					methods.put(methodHandler.getAnnotations(), method);
+					if (methodHandler.isAnnotationPresent(Time.class)) {
+						repetitions += methodHandler.getAnnotation(Time.class).repeat();
 					}
 				}
 				warmup(constructor.newInstance(), timeMethod); // So instance variables are left default
@@ -129,12 +133,13 @@ public class Runner {
 				long times = 0;
 				for (Method method : methods.get(Time.class)) {
 					Series<Number, Number> data = new Series<>();
-					for (int i = 1; i <= method.getAnnotation(Time.class).repeat(); i++) {
+					AnnotationHandler methodHandler = new AnnotationHandler(method);
+					for (int i = 1; i <= methodHandler.getAnnotation(Time.class).repeat(); i++) {
 						for (Method bef : methods.get(Before.class)) {
 							bef.setAccessible(true);
 							bef.invoke(object);
 						}
-						runWithTimeout(method, timeMethod, data, i, method.getAnnotation(Time.class).timeout(), object, false).await();
+						runWithTimeout(method, timeMethod, data, i, methodHandler.getAnnotation(Time.class).timeout(), object, false).await();
 						for (Method aft : methods.get(After.class)) {
 							aft.setAccessible(true);
 							aft.invoke(object);
@@ -147,7 +152,8 @@ public class Runner {
 					method.setAccessible(true);
 					method.invoke(object);
 				}
-				graphFinish();
+				AnnotationHandler clsHandler = new AnnotationHandler(cls);
+				graphFinish(clsHandler.isAnnotationPresent(Settings.class) && IntStream.of(clsHandler.getAnnotation(Settings.class).value()).anyMatch(x -> x == Setting.BEST_FIT));
 			}
 		}
 		latch.countDown();
@@ -194,7 +200,8 @@ public class Runner {
 	 * @throws InterruptedException      If the latches/barriers throw an exception
 	 */
 	private static void warmup(Object obj, TimeMethod timeMethod) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, NoSuchFieldException, SecurityException, InterruptedException {
-		if (obj.getClass().isAnnotationPresent(Warmup.class)) {
+		AnnotationHandler objHandler = new AnnotationHandler(obj.getClass());
+		if (objHandler.isAnnotationPresent(Warmup.class)) {
 			HashMap<Field, Object> staticFieldValues = new HashMap<>(); // Since static fields are shared, we need to keep track of the values
 			for(Field field : obj.getClass().getDeclaredFields()) {
 				if (Modifier.isStatic(field.getModifiers()) && !Modifier.isFinal(field.getModifiers())) {
@@ -207,9 +214,9 @@ public class Runner {
 				method.invoke(obj);
 			}
 			long warmup = 0;
-			long total = obj.getClass().getAnnotation(Warmup.class).iterations()*methods.get(Time.class).size();
+			long total = objHandler.getAnnotation(Warmup.class).iterations()*methods.get(Time.class).size();
 			for (Method method : methods.get(Time.class)) {
-				for (int i = 0; i < obj.getClass().getAnnotation(Warmup.class).iterations(); i++) {
+				for (int i = 0; i < objHandler.getAnnotation(Warmup.class).iterations(); i++) {
 					for (Method bef : methods.get(Before.class)) {
 						bef.setAccessible(true);
 						bef.invoke(obj);
@@ -219,7 +226,8 @@ public class Runner {
 						counter.setAccessible(true);
 						counter.set(obj, i);
 					}
-					runWithTimeout(method, timeMethod, null, i, method.getAnnotation(Time.class).timeout(), obj, true).await();
+					AnnotationHandler methodHandler = new AnnotationHandler(method);
+					runWithTimeout(method, timeMethod, null, i, methodHandler.getAnnotation(Time.class).timeout(), obj, true).await();
 					for (Method aft : methods.get(After.class)) {
 						aft.setAccessible(true);
 						aft.invoke(obj);
@@ -316,10 +324,11 @@ public class Runner {
 	private static void graphData(Method method, Series<Number, Number> chart, long x, long y) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 		Platform.runLater(() -> {
 			try {
-				if (!method.isAnnotationPresent(DisplayName.class)) {
+				AnnotationHandler methodHandler = new AnnotationHandler(method);
+				if (!methodHandler.isAnnotationPresent(DisplayName.class)) {
 					chart.setName(method.getName().substring(0, 1).toUpperCase() + method.getName().substring(1));
 				} else {
-					chart.setName(method.getAnnotation(DisplayName.class).value());
+					chart.setName(methodHandler.getAnnotation(DisplayName.class).value());
 				}
 				if (Arrays.stream(object.getClass().getDeclaredFields()).anyMatch(field -> field.getName().equals("counter"))) {
 					Field counter = object.getClass().getDeclaredField("counter");
@@ -342,7 +351,9 @@ public class Runner {
 	}
 
 	/**
-	 * Finishes a graph by executing the {@link Grapher#finish()} method.
+	 * Finishes a graph by executing the {@link Grapher#finish(boolean)} method.
+	 * 
+	 * @param bestFit Whether or not the best fit function should be calculated.
 	 * 
 	 * @throws NoSuchFieldException      If the field doesn't exist
 	 * @throws SecurityException         If there is a Security Manager encounters
@@ -353,10 +364,10 @@ public class Runner {
 	 * @throws InvocationTargetException If you're invoking the method on an
 	 *                                   incorrect object
 	 */
-	private static void graphFinish() throws NoSuchFieldException, SecurityException, NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		Method graphFinish = grapher.getClass().getDeclaredMethod("finish");
+	private static void graphFinish(boolean bestFit) throws NoSuchFieldException, SecurityException, NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		Method graphFinish = grapher.getClass().getDeclaredMethod("finish", boolean.class);
 		graphFinish.setAccessible(true);
-		graphFinish.invoke(grapher);
+		graphFinish.invoke(grapher, bestFit);
 	}
 
 	/**

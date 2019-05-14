@@ -321,12 +321,16 @@ public class Grapher extends Application {
 	 * <li>Limiting the graph view</li>
 	 * <li>Allows toggling of data</li>
 	 * </ul>
+	 * 
+	 * @param bestFit Whether or not the function of best fit should be calculated
 	 */
-	private void finish() {
+	private void finish(boolean bestFit) {
 		Platform.runLater(() -> {
 			isRunning = false;
 			scatterPlot.setTitle(scatterPlot.getTitle().split(" - ")[0]);
-			lineOfBestFit();
+			if (bestFit) {
+				lineOfBestFit();
+			}
 			prettifyView();
 			addZoomer();
 			for (Node node : scatterPlot.getChildrenUnmodifiable()) {
@@ -419,7 +423,7 @@ public class Grapher extends Application {
 			for (LinearRegression reg : fit) {
 				regressions.add(reg);
 			}
-			//series.setName(series.getName() + " " + regressions.first());
+			series.setName(series.getName() + " " + regressions.first());
 		}
 	}
 

@@ -15,7 +15,7 @@ import java.lang.annotation.*;
  * @author MagneticZero
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
+@Target({ElementType.METHOD, ElementType.TYPE})
 public @interface Time {
 	int repeat() default 10;
 
