@@ -9,7 +9,7 @@ import java.lang.annotation.*;
  * @author MagneticZero 
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
+@Target({ElementType.ANNOTATION_TYPE, ElementType.METHOD})
 public @interface AfterClass {
 
 }

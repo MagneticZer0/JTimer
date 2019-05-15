@@ -1,4 +1,5 @@
 package time;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -16,7 +17,7 @@ import org.jtimer.Misc.Setting;
 @Warmup(iterations = 500)
 public class Test {
 	
-	long counter = 0; // If you want some variable to keep the repitition that you're on.
+	long counter = 0; // If you want some variable to keep the repetition that you're on.
 	
 	ArrayList<Double> list; // Just a variable I'm using for fun
 

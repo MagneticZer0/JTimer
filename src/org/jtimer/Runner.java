@@ -6,6 +6,8 @@ import org.jtimer.Collections.MultiMap;
 import org.jtimer.Misc.Setting;
 
 import javafx.application.Platform;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Series;
 
@@ -61,6 +63,12 @@ public class Runner {
 	 * A multimap of methods that the Runner will execute.
 	 */
 	private static MultiMap<Method> methods = new MultiMap<>();
+	/**
+	 * Since creating a {@link AnnotationHandler} could be quite taxing with meta
+	 * annotations, a way of mapping methods to their annotations handlers would be
+	 * efficient.
+	 */
+	private static HashMap<Method, AnnotationHandler> methodHandlers = new HashMap<>();
 
 	/**
 	 * Since everything is static there is no need to be able to instantiate a new
@@ -112,17 +120,23 @@ public class Runner {
 	 * @throws Throwable Any exceptions not handled will be thrown
 	 */
 	public static void time(String pkg, TimeMethod timeMethod) throws Throwable {
-		for (Class<?> cls : getClasses(pkg)) {
+		Class<?>[] classes;
+		if (pkg.contains(".class")) {
+			classes = new Class[] { Class.forName(pkg.replace(".class", "")) };
+		} else {
+			classes  = getClasses(pkg);
+		}
+		for (Class<?> cls : classes) {
 			if (isInstantiable(cls)) {
 				Constructor<?> constructor = cls.getDeclaredConstructor(); // This is to access any protected classes
 				constructor.setAccessible(true);
 				object = constructor.newInstance(); //
 				long repetitions = 0;
 				for (Method method : cls.getDeclaredMethods()) {
-					AnnotationHandler methodHandler = new AnnotationHandler(method);
-					methods.put(methodHandler.getAnnotations(), method);
-					if (methodHandler.isAnnotationPresent(Time.class)) {
-						repetitions += methodHandler.getAnnotation(Time.class).repeat();
+					methodHandlers.put(method, new AnnotationHandler(method));
+					methods.put(methodHandlers.get(method).getAnnotations(), method);
+					if (methodHandlers.get(method).isAnnotationPresent(Time.class)) {
+						repetitions += methodHandlers.get(method).getAnnotation(Time.class).repeat();
 					}
 				}
 				warmup(constructor.newInstance(), timeMethod); // So instance variables are left default
@@ -133,13 +147,12 @@ public class Runner {
 				long times = 0;
 				for (Method method : methods.get(Time.class)) {
 					Series<Number, Number> data = new Series<>();
-					AnnotationHandler methodHandler = new AnnotationHandler(method);
-					for (int i = 1; i <= methodHandler.getAnnotation(Time.class).repeat(); i++) {
+					for (int i = 1; i <= methodHandlers.get(method).getAnnotation(Time.class).repeat(); i++) {
 						for (Method bef : methods.get(Before.class)) {
 							bef.setAccessible(true);
 							bef.invoke(object);
 						}
-						runWithTimeout(method, timeMethod, data, i, methodHandler.getAnnotation(Time.class).timeout(), object, false).await();
+						runWithTimeout(method, timeMethod, data, i, methodHandlers.get(method).getAnnotation(Time.class).timeout(), object, false).await();
 						for (Method aft : methods.get(After.class)) {
 							aft.setAccessible(true);
 							aft.invoke(object);
@@ -226,8 +239,7 @@ public class Runner {
 						counter.setAccessible(true);
 						counter.set(obj, i);
 					}
-					AnnotationHandler methodHandler = new AnnotationHandler(method);
-					runWithTimeout(method, timeMethod, null, i, methodHandler.getAnnotation(Time.class).timeout(), obj, true).await();
+					runWithTimeout(method, timeMethod, null, i, methodHandlers.get(method).getAnnotation(Time.class).timeout(), obj, true).await();
 					for (Method aft : methods.get(After.class)) {
 						aft.setAccessible(true);
 						aft.invoke(obj);
@@ -324,11 +336,10 @@ public class Runner {
 	private static void graphData(Method method, Series<Number, Number> chart, long x, long y) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 		Platform.runLater(() -> {
 			try {
-				AnnotationHandler methodHandler = new AnnotationHandler(method);
-				if (!methodHandler.isAnnotationPresent(DisplayName.class)) {
+				if (!methodHandlers.get(method).isAnnotationPresent(DisplayName.class)) {
 					chart.setName(method.getName().substring(0, 1).toUpperCase() + method.getName().substring(1));
 				} else {
-					chart.setName(methodHandler.getAnnotation(DisplayName.class).value());
+					chart.setName(methodHandlers.get(method).getAnnotation(DisplayName.class).value());
 				}
 				if (Arrays.stream(object.getClass().getDeclaredFields()).anyMatch(field -> field.getName().equals("counter"))) {
 					Field counter = object.getClass().getDeclaredField("counter");
@@ -340,8 +351,8 @@ public class Runner {
 				if (y < ((double) graphMax.get(grapher))) {
 					chart.getData().add(new XYChart.Data<>(x, y));
 				}
-				if (!grapher.scatterPlot.getData().contains(chart) && chart.getData().size() != 0) {
-					grapher.scatterPlot.getData().add(chart);
+				if (!grapher.plot.getData().contains(chart) && chart.getData().size() != 0) {
+					grapher.plot.getData().add(chart);
 				}
 			} catch (ReflectiveOperationException e) {
 				e.printStackTrace();
@@ -416,6 +427,7 @@ public class Runner {
 				assert !file.getName().contains(".");
 				classes.addAll(findClasses(file, packageName + "." + file.getName()));
 			} else if (file.getName().endsWith(".class")) {
+				System.out.println(packageName + '.' + file.getName().substring(0, file.getName().length() - 6));
 				classes.add(Class.forName(packageName + '.' + file.getName().substring(0, file.getName().length() - 6)));
 			}
 		}

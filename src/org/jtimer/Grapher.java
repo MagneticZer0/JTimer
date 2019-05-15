@@ -22,8 +22,10 @@ import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
+import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
+import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
 import javafx.scene.effect.Light.Point;
@@ -86,9 +88,9 @@ public class Grapher extends Application {
 	/**
 	 * The actual scatter plot
 	 */
-	public ScatterChart<Number, Number> scatterPlot = new ScatterChart<>(xAxis, yAxis);
+	public XYChart<Number, Number> plot = new ScatterChart<>(xAxis, yAxis);
 	/**
-	 * The pane that houses the ScatterChart {@link Grapher#scatterPlot}
+	 * The pane that houses the ScatterChart {@link Grapher#plot}
 	 */
 	private Pane pane = new Pane();
 	/**
@@ -114,12 +116,12 @@ public class Grapher extends Application {
 			System.exit(0);
 		});
 
-		scatterPlot.setTitle(graphTitle);
+		plot.setTitle(graphTitle);
 
 		Scene scene = new Scene(pane, 800, 600);
-		scatterPlot.prefHeightProperty().bind(scene.heightProperty());
-		scatterPlot.prefWidthProperty().bind(scene.widthProperty());
-		pane.getChildren().add(scatterPlot);
+		plot.prefHeightProperty().bind(pane.heightProperty());
+		plot.prefWidthProperty().bind(pane.widthProperty());
+		pane.getChildren().add(plot);
 
 		scene.setOnKeyPressed(e -> { // This is the key listener for CTRL + S
 			if (save.match(e)) {
@@ -128,7 +130,7 @@ public class Grapher extends Application {
 				chooser.setTitle("Select where to save the graph...");
 				chooser.setInitialDirectory(new File(System.getProperty("user.home") + "/Desktop"));
 				File output = chooser.showSaveDialog(stage);
-				WritableImage image = scatterPlot.snapshot(new SnapshotParameters(), null);
+				WritableImage image = plot.snapshot(new SnapshotParameters(), null);
 				try {
 					if (output != null) {
 						ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", output);
@@ -150,7 +152,7 @@ public class Grapher extends Application {
 		Rectangle selectionVisual = new Rectangle(); // This is for visuals
 		Point selection = new Point();
 
-		scatterPlot.setOnMousePressed(e -> {
+		plot.setOnMousePressed(e -> {
 			if (e.getButton() == MouseButton.PRIMARY && e.isControlDown()) {
 				selection.setX(e.getSceneX());
 				selection.setY(e.getSceneY());
@@ -166,7 +168,7 @@ public class Grapher extends Application {
 			}
 		});
 
-		scatterPlot.setOnMouseDragged(e -> {
+		plot.setOnMouseDragged(e -> {
 			if (e.getButton() == MouseButton.PRIMARY && e.isControlDown()) {
 				selectionVisual.setWidth(Math.abs(e.getSceneX() - selection.getX()));
 				selectionVisual.setHeight(Math.abs(e.getSceneY() - selection.getY()));
@@ -175,7 +177,7 @@ public class Grapher extends Application {
 			}
 		});
 
-		scatterPlot.setOnMouseReleased(e -> {
+		plot.setOnMouseReleased(e -> {
 			if (e.getButton() == MouseButton.PRIMARY && e.isControlDown()) {
 				pane.getChildren().remove(selectionVisual);
 				if (selectionVisual.getWidth() + selectionVisual.getHeight() > 2) { // Avoids just pressing
@@ -205,10 +207,10 @@ public class Grapher extends Application {
 	public void setGraphTitle(String graphTitle) {
 		Platform.runLater(() -> {
 			this.graphTitle = graphTitle;
-			scatterPlot.setTitle(graphTitle);
+			plot.setTitle(graphTitle);
 			if (isRunning) {
 				this.graphTitle += " - ";
-				scatterPlot.setTitle(scatterPlot.getTitle() + " - ");
+				plot.setTitle(plot.getTitle() + " - ");
 			}
 		});
 	}
@@ -222,7 +224,7 @@ public class Grapher extends Application {
 	 */
 	public void setProgress(Double progress, boolean warmup) {
 		Platform.runLater(() -> {
-			scatterPlot.setTitle(graphTitle + new If<String>(warmup).Then(" Warmup ").Else("") + String.format("%3.2f", progress * 100) + "%");
+			plot.setTitle(graphTitle + new If<String>(warmup).Then(" Warmup ").Else("") + String.format("%3.2f", progress * 100) + "%");
 		});
 	}
 
@@ -327,17 +329,17 @@ public class Grapher extends Application {
 	private void finish(boolean bestFit) {
 		Platform.runLater(() -> {
 			isRunning = false;
-			scatterPlot.setTitle(scatterPlot.getTitle().split(" - ")[0]);
+			plot.setTitle(plot.getTitle().split(" - ")[0]);
 			if (bestFit) {
 				lineOfBestFit();
 			}
 			prettifyView();
 			addZoomer();
-			for (Node node : scatterPlot.getChildrenUnmodifiable()) {
+			for (Node node : plot.getChildrenUnmodifiable()) {
 				if (node instanceof Legend) {
 					Legend legend = (Legend) node;
 					for (LegendItem item : legend.getItems()) {
-						for (Series<Number, Number> series : scatterPlot.getData()) {
+						for (Series<Number, Number> series : plot.getData()) {
 							if (series.getName().equals(item.getText())) {
 								item.getSymbol().setCursor(Cursor.HAND);
 								item.getSymbol().setOnMouseClicked(e -> {
@@ -371,7 +373,7 @@ public class Grapher extends Application {
 		double total = 0;
 		double maxX = 0;
 		int points = 0;
-		for (Series<Number, Number> dataPoint : scatterPlot.getData()) {
+		for (Series<Number, Number> dataPoint : plot.getData()) {
 			for (Data<Number, Number> data : dataPoint.getData()) {
 				data.getNode().setScaleX(0.7);
 				data.getNode().setScaleY(0.7);
@@ -386,7 +388,7 @@ public class Grapher extends Application {
 		}
 		double mean = total / points;
 		total = 0;
-		for (Series<Number, Number> dataPoint : scatterPlot.getData()) {
+		for (Series<Number, Number> dataPoint : plot.getData()) {
 			for (Data<Number, Number> data : dataPoint.getData()) {
 				if (data.getNode().isVisible()) {
 					total += Math.pow(data.getYValue().doubleValue() - mean, 2);
@@ -409,8 +411,11 @@ public class Grapher extends Application {
 	 * <b>CURRENTLY AN EXPERIMENTAL FEATURE</b>
 	 */
 	private void lineOfBestFit() {
+		NumberAxis xAxis = new NumberAxis();
+		NumberAxis yAxis = new NumberAxis();
+		XYChart<Number, Number> plot = new LineChart<>(xAxis, yAxis);
 		TreeSet<LinearRegression> regressions = null;
-		for (Series<Number, Number> series : scatterPlot.getData()) {
+		for (Series<Number, Number> series : this.plot.getData()) {
 			regressions = new TreeSet<>();
 			double[][] data = getData(series);
 			LinearRegression[] fit = { 
@@ -423,8 +428,21 @@ public class Grapher extends Application {
 			for (LinearRegression reg : fit) {
 				regressions.add(reg);
 			}
-			series.setName(series.getName() + " " + regressions.first());
+			Series<Number, Number> dataSeries = new Series<>();
+			dataSeries.setName(series.getName());
+			for(int i=0; i<=data[0].length; i++) {
+				double fx = regressions.first().calculate(i);
+				dataSeries.getData().add(new Data<Number, Number>(i, If(fx < 0 || Double.isNaN(fx) || Double.isInfinite(fx)).Then(0d).Else(fx)));
+			}
+			plot.getData().add(dataSeries);
 		}
+		pane.getChildren().remove(this.plot);
+		pane.getChildren().add(plot);
+		plot.prefHeightProperty().bind(pane.heightProperty());
+		plot.prefWidthProperty().bind(pane.widthProperty());
+		this.plot = plot;
+		this.xAxis = xAxis;
+		this.yAxis = yAxis;
 	}
 
 	/**

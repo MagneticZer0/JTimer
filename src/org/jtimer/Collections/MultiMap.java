@@ -2,6 +2,7 @@ package org.jtimer.Collections;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -14,7 +15,7 @@ public class MultiMap<V> {
 		internalMap = new HashMap<>();
 	}
 	
-	public void put(Annotation[] annotations, V value) {
+	public void put(Collection<Annotation> annotations, V value) {
 		for(Annotation annotation : annotations) {
 			put(annotation, value);
 		}

@@ -14,7 +14,7 @@ import java.lang.annotation.*;
  *
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD, ElementType.TYPE})
+@Target({ElementType.ANNOTATION_TYPE, ElementType.METHOD})
 public @interface DisplayName {
-	String value();
+	String value() default "";
 }

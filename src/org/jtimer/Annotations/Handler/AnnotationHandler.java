@@ -2,19 +2,11 @@ package org.jtimer.Annotations.Handler;
 
 import java.lang.annotation.*;
 import java.lang.reflect.AnnotatedElement;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 
 public class AnnotationHandler {
 
-	/**
-	 * A field containing the java.lang annotations as these annotations tend to
-	 * lead to infinite recursion, which I have yet to deal with besides checking.
-	 */
-	private static final Set<Class<?>> JAVA_LANG_ANNOTATIONS = new HashSet<>(Arrays.asList(new Class[] { Documented.class, Inherited.class, Native.class, Repeatable.class, Retention.class, Target.class }));
 	/**
 	 * A mapping for annotation classes to the actual annotations
 	 */
@@ -43,13 +35,11 @@ public class AnnotationHandler {
 	 * @param level      The level of recursions we're in
 	 */
 	private void process(Annotation annotation, int level) {
-		if (annotations.get(annotation.annotationType()) == null || levelMap.getOrDefault(annotation.annotationType(), 1) < level) {
+		if (annotations.get(annotation.annotationType()) == null || levelMap.getOrDefault(annotation.annotationType(), -1) > level) {
 			levelMap.put(annotation.annotationType(), level);
 			annotations.put(annotation.annotationType(), annotation);
-		}
-		for (Annotation metaAnnotation : annotation.annotationType().getAnnotations()) {
-			if (!JAVA_LANG_ANNOTATIONS.contains(metaAnnotation.annotationType())) {
-				process(metaAnnotation, level - 1);
+			for (Annotation metaAnnotation : annotation.annotationType().getAnnotations()) {
+				process(metaAnnotation, level + 1);
 			}
 		}
 	}
@@ -58,9 +48,8 @@ public class AnnotationHandler {
 	 * Returns all annotataions present for the object
 	 * @return All annotations present
 	 */
-	public Annotation[] getAnnotations() {
-		Collection<Annotation> annotations = this.annotations.values();
-		return annotations.toArray(new Annotation[annotations.size()]);
+	public Collection<Annotation> getAnnotations() {
+		return annotations.values();
 	}
 
 	/**
@@ -70,7 +59,7 @@ public class AnnotationHandler {
 	 * @return Whether or not the annotation is preset
 	 */
 	public boolean isAnnotationPresent(Class<? extends Annotation> annotationType) {
-		return annotations.keySet().contains(annotationType);
+		return annotations.containsKey(annotationType);
 	}
 
 	/**
