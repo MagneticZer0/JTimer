@@ -6,8 +6,6 @@ import org.jtimer.Collections.MultiMap;
 import org.jtimer.Misc.Setting;
 
 import javafx.application.Platform;
-import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Series;
 
@@ -427,7 +425,6 @@ public class Runner {
 				assert !file.getName().contains(".");
 				classes.addAll(findClasses(file, packageName + "." + file.getName()));
 			} else if (file.getName().endsWith(".class")) {
-				System.out.println(packageName + '.' + file.getName().substring(0, file.getName().length() - 6));
 				classes.add(Class.forName(packageName + '.' + file.getName().substring(0, file.getName().length() - 6)));
 			}
 		}

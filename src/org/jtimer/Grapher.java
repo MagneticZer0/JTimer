@@ -22,7 +22,6 @@ import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
-import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.XYChart;
@@ -64,6 +63,11 @@ public class Grapher extends Application {
 	 * The grapher object
 	 */
 	private static Grapher grapher = null;
+	/**
+	 * Currently does not serve any other purpose besides getting the instance of
+	 * the line plot graph
+	 */
+	private Grapher linePlotGrapher = null;
 	/**
 	 * The latch for the grapher
 	 */
@@ -212,6 +216,9 @@ public class Grapher extends Application {
 				this.graphTitle += " - ";
 				plot.setTitle(plot.getTitle() + " - ");
 			}
+			if (linePlotGrapher != null) {
+				linePlotGrapher.setGraphTitle(graphTitle);
+			}
 		});
 	}
 
@@ -236,6 +243,9 @@ public class Grapher extends Application {
 	public void setxDesc(String xDesc) {
 		Platform.runLater(() -> {
 			xAxis.setLabel(xDesc);
+			if (linePlotGrapher != null) {
+				linePlotGrapher.setxDesc(xDesc);
+			}
 		});
 	}
 
@@ -247,6 +257,9 @@ public class Grapher extends Application {
 	public void setyDesc(String yDesc) {
 		Platform.runLater(() -> {
 			yAxis.setLabel(yDesc);
+			if (linePlotGrapher != null) {
+				linePlotGrapher.setyDesc(yDesc);
+			}
 		});
 	}
 
@@ -258,6 +271,9 @@ public class Grapher extends Application {
 	 */
 	public void setMax(double max) {
 		this.max = max;
+		if (linePlotGrapher != null) {
+			linePlotGrapher.setMax(max);
+		}
 	}
 
 	/**
@@ -268,6 +284,9 @@ public class Grapher extends Application {
 	 */
 	public void setMaxDeviations(double maxDeviations) {
 		this.maxDeviations = maxDeviations;
+		if (linePlotGrapher != null) {
+			linePlotGrapher.setMaxDeviations(maxDeviations);
+		}
 	}
 
 	/**
@@ -293,12 +312,7 @@ public class Grapher extends Application {
 	 * @return Returns the grapher instance created.
 	 */
 	public static Grapher start() {
-		new Thread() {
-			@Override
-			public void run() {
-				Application.launch(Grapher.class);
-			}
-		}.start();
+		new Thread(() -> Application.launch(Grapher.class)).start();
 		try {
 			latch.await();
 		} catch (InterruptedException e) {
@@ -411,11 +425,10 @@ public class Grapher extends Application {
 	 * <b>CURRENTLY AN EXPERIMENTAL FEATURE</b>
 	 */
 	private void lineOfBestFit() {
-		NumberAxis xAxis = new NumberAxis();
-		NumberAxis yAxis = new NumberAxis();
-		XYChart<Number, Number> plot = new LineChart<>(xAxis, yAxis);
+		linePlotGrapher = new Grapher();
+		XYChart<Number, Number> linePlotPlt = linePlotGrapher.plot;
 		TreeSet<LinearRegression> regressions = null;
-		for (Series<Number, Number> series : this.plot.getData()) {
+		for (Series<Number, Number> series : plot.getData()) {
 			regressions = new TreeSet<>();
 			double[][] data = getData(series);
 			LinearRegression[] fit = { 
@@ -432,17 +445,18 @@ public class Grapher extends Application {
 			dataSeries.setName(series.getName());
 			for(int i=0; i<=data[0].length; i++) {
 				double fx = regressions.first().calculate(i);
-				dataSeries.getData().add(new Data<Number, Number>(i, If(fx < 0 || Double.isNaN(fx) || Double.isInfinite(fx)).Then(0d).Else(fx)));
+				dataSeries.getData().add(new Data<Number, Number>(i, If(fx < 0 || !Double.isFinite(fx)).Then(0d).Else(fx)));
 			}
-			plot.getData().add(dataSeries);
+			linePlotPlt.getData().add(dataSeries);
 		}
-		pane.getChildren().remove(this.plot);
-		pane.getChildren().add(plot);
-		plot.prefHeightProperty().bind(pane.heightProperty());
-		plot.prefWidthProperty().bind(pane.widthProperty());
-		this.plot = plot;
-		this.xAxis = xAxis;
-		this.yAxis = yAxis;
+		Stage linePlotStage = new Stage();
+		Pane linePlotPane = new Pane();
+		Scene linePlotScene = new Scene(linePlotPane, 800, 600);
+		linePlotStage.setScene(linePlotScene);
+		linePlotPane.getChildren().add(linePlotPlt);
+		linePlotGrapher.start(linePlotStage);
+		linePlotGrapher.finish(false);
+		plot.getScene().getWindow().requestFocus();
 	}
 
 	/**
