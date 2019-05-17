@@ -20,14 +20,14 @@ public class If<V> {
 	 */
 	private V thenValue;
 	/**
-	 * If the {@link If#Then(Object)} has been executed.
+	 * If the {@link org.jtimer.Readability.If#Then(Object)} has been executed.
 	 */
 	private boolean thenExecuted = false;
 	/**
 	 * If the conditional is false, this value will be returned.
 	 */
 	private V elseValue;
-	
+
 	/**
 	 * Intialize the If object with the initial boolean
 	 * 
@@ -55,7 +55,7 @@ public class If<V> {
 	 * 
 	 * @param elseValue The value to return if false
 	 * @return Returns the proper value
-	 * @throws NotProperlyInitializedException If {@link If#Then(Object)} was not
+	 * @throws NotProperlyInitializedException If {@link org.jtimer.Readability.If#Then(Object)} was not
 	 *                                         used before this.
 	 */
 	public V Else(V elseValue) throws NotProperlyInitializedException {
@@ -68,7 +68,7 @@ public class If<V> {
 	 * after the else method is used.
 	 * 
 	 * @return Returns the proper value
-	 * @throws NotProperlyInitializedException If {@link If#Then(Object)} was not
+	 * @throws NotProperlyInitializedException If {@link org.jtimer.Readability.If#Then(Object)} was not
 	 *                                         used before this.
 	 */
 	private V exec() throws NotProperlyInitializedException {

@@ -9,7 +9,7 @@ import javax.imageio.ImageIO;
 
 import org.jtimer.Readability.If;
 import org.jtimer.Regression.FunctionalFit;
-import org.jtimer.Regression.LinearRegression;
+import org.jtimer.Regression.Regression;
 import org.jtimer.Regression.PolynomialFit;
 
 import com.sun.javafx.charts.Legend;
@@ -74,7 +74,7 @@ public class Grapher extends Application {
 	private static CountDownLatch latch = new CountDownLatch(1);
 	/**
 	 * The maximum Y for the graph By default this is
-	 * {@link Double#POSITIVE_INFINITY}
+	 * {@link java.lang.Double#POSITIVE_INFINITY}
 	 */
 	private double max = Double.POSITIVE_INFINITY;
 	/**
@@ -94,7 +94,7 @@ public class Grapher extends Application {
 	 */
 	public XYChart<Number, Number> plot = new ScatterChart<>(xAxis, yAxis);
 	/**
-	 * The pane that houses the ScatterChart {@link Grapher#plot}
+	 * The pane that houses the ScatterChart {@link org.jtimer.Grapher#plot}
 	 */
 	private Pane pane = new Pane();
 	/**
@@ -265,7 +265,7 @@ public class Grapher extends Application {
 
 	/**
 	 * Sets the maximum value that the graph will graph. By default this is
-	 * {@link Double#POSITIVE_INFINITY}
+	 * {@link java.lang.Double#POSITIVE_INFINITY}
 	 * 
 	 * @param max The maximum value
 	 */
@@ -320,9 +320,10 @@ public class Grapher extends Application {
 		}
 		return grapher;
 	}
-	
+
 	/**
 	 * Awaits the grapher to finish everything
+	 * 
 	 * @throws InterruptedException If the latch throws an exception
 	 */
 	public void await() throws InterruptedException {
@@ -380,7 +381,7 @@ public class Grapher extends Application {
 
 	/**
 	 * "Prettifies" a graph by limiting the view of it to within
-	 * {@link Grapher#maxDeviations} standard deviations Also makes the data points
+	 * {@link org.jtimer.Grapher#maxDeviations} standard deviations Also makes the data points
 	 * on the graph a bit smaller since they're too big by default.
 	 */
 	private void prettifyView() {
@@ -411,8 +412,8 @@ public class Grapher extends Application {
 		}
 		double deviation = Math.sqrt(total / points);
 		yAxis.setAutoRanging(false);
-		yAxis.setLowerBound(Math.round(If((mean - maxDeviations * deviation < 0) || (deviation == 0)).Then(0d).Else(mean-maxDeviations*deviation)));
-		yAxis.setUpperBound(Math.round(If(deviation != 0).Then(mean + maxDeviations*deviation).Else(2*mean)));
+		yAxis.setLowerBound(Math.round(If((mean - maxDeviations * deviation < 0) || (deviation == 0)).Then(0d).Else(mean - maxDeviations * deviation)));
+		yAxis.setUpperBound(Math.round(If(deviation != 0).Then(mean + maxDeviations * deviation).Else(2 * mean)));
 		yAxis.setTickUnit(Math.round((yAxis.getUpperBound() - yAxis.getLowerBound()) / 10));
 		xAxis.setAutoRanging(false);
 		xAxis.setLowerBound(0);
@@ -427,23 +428,24 @@ public class Grapher extends Application {
 	private void lineOfBestFit() {
 		linePlotGrapher = new Grapher();
 		XYChart<Number, Number> linePlotPlt = linePlotGrapher.plot;
-		TreeSet<LinearRegression> regressions = null;
+		TreeSet<Regression> regressions = null;
 		for (Series<Number, Number> series : plot.getData()) {
 			regressions = new TreeSet<>();
 			double[][] data = getData(series);
-			LinearRegression[] fit = { 
-					new PolynomialFit(data[0], data[1], 2).name("O(n)"),
-					new PolynomialFit(data[0], data[1], 3).name("O(n^2)"),
-					new PolynomialFit(data[0], data[1], 4).name("O(n^3)"),
-					new FunctionalFit(data[0], data[1], x -> Math.log(x)).name("O(lg n)"),
+			Regression[] fit = { 
+					new PolynomialFit(data[0], data[1], 2).name("O(n)"), 
+					new PolynomialFit(data[0], data[1], 3).name("O(n^2)"), 
+					new PolynomialFit(data[0], data[1], 4).name("O(n^3)"), 
+					new FunctionalFit(data[0], data[1], x -> Math.log(x)).name("O(lg n)"), 
 					new FunctionalFit(data[0], data[1], x -> x * Math.log(x)).name("O(n lg n)"),
-					new FunctionalFit(data[0], data[1], x -> Math.pow(2, x)).name("O(2^n)") };
-			for (LinearRegression reg : fit) {
+					new FunctionalFit(data[0], data[1], x -> Math.pow(2, x)).name("O(2^n)") 
+			};
+			for (Regression reg : fit) {
 				regressions.add(reg);
 			}
 			Series<Number, Number> dataSeries = new Series<>();
 			dataSeries.setName(series.getName());
-			for(int i=0; i<=data[0].length; i++) {
+			for (int i = 0; i <= data[0].length; i++) {
 				double fx = regressions.first().calculate(i);
 				dataSeries.getData().add(new Data<Number, Number>(i, If(fx < 0 || !Double.isFinite(fx)).Then(0d).Else(fx)));
 			}
@@ -460,7 +462,7 @@ public class Grapher extends Application {
 	}
 
 	/**
-	 * Gets the XS and YS of a series, used by {@link Grapher#lineOfBestFit()}
+	 * Gets the XS and YS of a series, used by {@link org.jtimer.Grapher#lineOfBestFit()}
 	 * 
 	 * @param series The series
 	 * @return A double[][] of xs and ys
@@ -474,11 +476,12 @@ public class Grapher extends Application {
 		}
 		return new double[][] { xs, ys };
 	}
-	
+
 	/**
 	 * Little helper function to improve code readability
+	 * 
 	 * @param conditional The conditional to check
-	 * @return An {@link If} Object
+	 * @return An {@link org.jtimer.Readability.If} Object
 	 */
 	private If<Double> If(boolean conditional) {
 		return new If<Double>(conditional);

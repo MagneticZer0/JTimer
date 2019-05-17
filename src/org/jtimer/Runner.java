@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
-import java.util.stream.IntStream;
 
 /**
  * The brains behind everything I'd say. This is what times methods, adds
@@ -62,7 +61,7 @@ public class Runner {
 	 */
 	private static MultiMap<Method> methods = new MultiMap<>();
 	/**
-	 * Since creating a {@link AnnotationHandler} could be quite taxing with meta
+	 * Since creating a {@link org.jtimer.Annotations.Handler.AnnotationHandler} could be quite taxing with meta
 	 * annotations, a way of mapping methods to their annotations handlers would be
 	 * efficient.
 	 */
@@ -122,7 +121,7 @@ public class Runner {
 		if (pkg.contains(".class")) {
 			classes = new Class[] { Class.forName(pkg.replace(".class", "")) };
 		} else {
-			classes  = getClasses(pkg);
+			classes = getClasses(pkg);
 		}
 		for (Class<?> cls : classes) {
 			if (isInstantiable(cls)) {
@@ -164,7 +163,7 @@ public class Runner {
 					method.invoke(object);
 				}
 				AnnotationHandler clsHandler = new AnnotationHandler(cls);
-				graphFinish(clsHandler.isAnnotationPresent(Settings.class) && IntStream.of(clsHandler.getAnnotation(Settings.class).value()).anyMatch(x -> x == Setting.BEST_FIT));
+				graphFinish(clsHandler.isAnnotationPresent(Settings.class) && Arrays.stream(clsHandler.getAnnotation(Settings.class).value()).anyMatch(x -> x.equals(Setting.BEST_FIT)));
 			}
 		}
 		latch.countDown();
@@ -214,7 +213,7 @@ public class Runner {
 		AnnotationHandler objHandler = new AnnotationHandler(obj.getClass());
 		if (objHandler.isAnnotationPresent(Warmup.class)) {
 			HashMap<Field, Object> staticFieldValues = new HashMap<>(); // Since static fields are shared, we need to keep track of the values
-			for(Field field : obj.getClass().getDeclaredFields()) {
+			for (Field field : obj.getClass().getDeclaredFields()) {
 				if (Modifier.isStatic(field.getModifiers()) && !Modifier.isFinal(field.getModifiers())) {
 					field.setAccessible(true);
 					staticFieldValues.put(field, field.get(null));
@@ -225,7 +224,7 @@ public class Runner {
 				method.invoke(obj);
 			}
 			long warmup = 0;
-			long total = objHandler.getAnnotation(Warmup.class).iterations()*methods.get(Time.class).size();
+			long total = objHandler.getAnnotation(Warmup.class).iterations() * methods.get(Time.class).size();
 			for (Method method : methods.get(Time.class)) {
 				for (int i = 0; i < objHandler.getAnnotation(Warmup.class).iterations(); i++) {
 					for (Method bef : methods.get(Before.class)) {
@@ -250,7 +249,7 @@ public class Runner {
 				method.setAccessible(true);
 				method.invoke(obj);
 			}
-			for(Field field : staticFieldValues.keySet()) {
+			for (Field field : staticFieldValues.keySet()) {
 				field.set(null, staticFieldValues.get(field)); // Reset all static values
 			}
 		}
@@ -360,7 +359,7 @@ public class Runner {
 	}
 
 	/**
-	 * Finishes a graph by executing the {@link Grapher#finish(boolean)} method.
+	 * Finishes a graph by executing the {@link org.jtimer.Grapher#finish(boolean)} method.
 	 * 
 	 * @param bestFit Whether or not the best fit function should be calculated.
 	 * 
@@ -447,13 +446,13 @@ public class Runner {
 
 	/**
 	 * An interface used to change how things are timed. By default,
-	 * {@link TimeMethod#timeMethod()} uses {@link System#nanoTime()} and a method
+	 * {@link TimeMethod.#timeMethod()} uses {@link java.lang.System#nanoTime()} and a method
 	 * to convert nanoseconds into your custom timing method
 	 */
 	public interface TimeMethod {
 		/**
 		 * A way to get System time however you want it, by default this is
-		 * {@link System#nanoTime()}
+		 * {@link java.lang.System#nanoTime()}
 		 * 
 		 * @return A time
 		 */

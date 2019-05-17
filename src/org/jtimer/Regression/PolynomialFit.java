@@ -5,7 +5,7 @@ package org.jtimer.Regression;
  * 
  * @author MagneticZero
  */
-public class PolynomialFit extends LinearRegression {
+public class PolynomialFit extends Regression {
 
 	/**
 	 * The coefficients of the regression
@@ -50,7 +50,7 @@ public class PolynomialFit extends LinearRegression {
 	}
 
 	/**
-	 * Calculates f(x) using the generated linear regression
+	 * Calculates f(x) using the generated regression
 	 * 
 	 * @param x The x to use
 	 * @return f(x) aka y

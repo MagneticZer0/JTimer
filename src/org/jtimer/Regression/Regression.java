@@ -1,13 +1,13 @@
 package org.jtimer.Regression;
 
 /**
- * An abstract class that acts as a base-line for the other forms of linear
- * regression. Has methods to compare regressions, calculate the error, and
- * setting the names and an abstract method for calculating f(x).
+ * An abstract class that acts as a base-line for the other forms of regression.
+ * Has methods to compare regressions, calculate the error, and setting the
+ * names and an abstract method for calculating f(x).
  * 
  * @author MagneticZero
  */
-public abstract class LinearRegression implements Comparable<LinearRegression> {
+public abstract class Regression implements Comparable<Regression> {
 
 	/**
 	 * The error for the regression
@@ -47,7 +47,7 @@ public abstract class LinearRegression implements Comparable<LinearRegression> {
 	/**
 	 * Comapres one regression to another by using the error
 	 */
-	public int compareTo(LinearRegression reg) {
+	public int compareTo(Regression reg) {
 		return (int) Math.round((error - reg.error) * 100);
 	}
 
@@ -59,13 +59,13 @@ public abstract class LinearRegression implements Comparable<LinearRegression> {
 	}
 
 	/**
-	 * Sets the name of the LinearRegression, this value is returned by
-	 * {@link LinearRegression#toString()}.
+	 * Sets the name of the Regression, this value is returned by
+	 * {@link org.jtimer.Regression.Regression#toString()}.
 	 * 
 	 * @param name The name to set to
 	 * @return Just a convenience
 	 */
-	public LinearRegression name(String name) {
+	public Regression name(String name) {
 		this.name = name;
 		return this;
 	}

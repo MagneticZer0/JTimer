@@ -5,6 +5,15 @@ import java.lang.reflect.AnnotatedElement;
 import java.util.Collection;
 import java.util.HashMap;
 
+/**
+ * An object that is able to handle all meta annotations of a
+ * {@link java.lang.reflect.AnnotatedElement} object. If annotations are
+ * repeated, then only the topmost annotation present will be the one returned,
+ * if it's needed.
+ * 
+ * @author MagneticZero
+ *
+ */
 public class AnnotationHandler {
 
 	/**
@@ -18,7 +27,8 @@ public class AnnotationHandler {
 	private HashMap<Class<? extends Annotation>, Integer> levelMap = new HashMap<>();
 
 	/**
-	 * Creates an annotation handler for a Java AnnotatedElement Object 
+	 * Creates an annotation handler for a Java AnnotatedElement Object
+	 * 
 	 * @param object The object to get the annotations of.
 	 */
 	public AnnotationHandler(AnnotatedElement object) {
@@ -46,6 +56,7 @@ public class AnnotationHandler {
 
 	/**
 	 * Returns all annotataions present for the object
+	 * 
 	 * @return All annotations present
 	 */
 	public Collection<Annotation> getAnnotations() {

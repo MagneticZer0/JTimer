@@ -5,7 +5,7 @@ package org.jtimer.Regression;
  * 
  * @author MagneticZero
  */
-public class FunctionalFit extends LinearRegression {
+public class FunctionalFit extends Regression {
 
 	/**
 	 * The coefficients of the regression
@@ -57,7 +57,7 @@ public class FunctionalFit extends LinearRegression {
 	}
 
 	/**
-	 * Calculates f(x) using the generated linear regression
+	 * Calculates f(x) using the generated regression
 	 * 
 	 * @param x The x to use
 	 * @return f(x) aka y
