@@ -30,7 +30,10 @@ import java.util.concurrent.CyclicBarrier;
  * The brains behind everything I'd say. This is what times methods, adds
  * timeout to methods, adds the data to a graph, recursively finds all methods
  * inside a package, etc. It does a lot and I should probably split things up a
- * bit just to make it look better.
+ * bit just to make it look better. To get a more detailed look at what the
+ * runner does make sure to look at the time method
+ * 
+ * @see org.jtimer.Runner#time(String, TimeMethod)
  * 
  * @author MagneticZero
  */
@@ -80,8 +83,14 @@ public class Runner {
 	 * pkg. See {@link org.jtimer.Runner#time(String, TimeMethod)} for a more
 	 * detailed method that does the same thing.
 	 * 
+	 * @see Runner#time(String, TimeMethod)
+	 * 
 	 * @param pkg The package name that contains the things you want to time
-	 * @throws Throwable Any exceptions not handled will be thrown
+	 * @throws Throwable This could be a number of things, although most things
+	 *                   should be already handeled by the Runner, there's a special
+	 *                   case though if the Exception is a
+	 *                   {@link java.lang.reflect.InvocationTargetException} then
+	 *                   the Runner will unwrap the exception beforehand.
 	 */
 	public static void time(String pkg) throws Throwable {
 		time(pkg, new TimeMethod() {
@@ -114,59 +123,67 @@ public class Runner {
 	 *
 	 * @param pkg        The package name that contains the things you want to time
 	 * @param timeMethod The functional interface for timing however you want
-	 * @throws Throwable Any exceptions not handled will be thrown
+	 * @throws Throwable This could be a number of things, although most things
+	 *                   should be already handeled by the Runner, there's a special
+	 *                   case though if the Exception is a
+	 *                   {@link java.lang.reflect.InvocationTargetException} then
+	 *                   the Runner will unwrap the exception beforehand.
 	 */
 	public static void time(String pkg, TimeMethod timeMethod) throws Throwable {
-		Class<?>[] classes;
-		if (pkg.contains(".class")) {
-			classes = new Class[] { Class.forName(pkg.replace(".class", "")) };
-		} else {
-			classes = getClasses(pkg);
-		}
-		for (Class<?> cls : classes) {
-			if (isInstantiable(cls)) {
-				Constructor<?> constructor = cls.getDeclaredConstructor(); // This is to access any protected classes
-				constructor.setAccessible(true);
-				object = constructor.newInstance(); //
-				long repetitions = 0;
-				for (Method method : cls.getDeclaredMethods()) {
-					methodHandlers.put(method, new AnnotationHandler(method));
-					methods.put(methodHandlers.get(method).getAnnotations(), method);
-					if (methodHandlers.get(method).isAnnotationPresent(Time.class)) {
-						repetitions += methodHandlers.get(method).getAnnotation(Time.class).repeat();
-					}
-				}
-				warmup(constructor.newInstance(), timeMethod); // So instance variables are left default
-				for (Method method : methods.get(BeforeClass.class)) {
-					method.setAccessible(true);
-					method.invoke(object);
-				}
-				long times = 0;
-				for (Method method : methods.get(Time.class)) {
-					Series<Number, Number> data = new Series<>();
-					for (int i = 1; i <= methodHandlers.get(method).getAnnotation(Time.class).repeat(); i++) {
-						for (Method bef : methods.get(Before.class)) {
-							bef.setAccessible(true);
-							bef.invoke(object);
-						}
-						runWithTimeout(method, timeMethod, data, i, methodHandlers.get(method).getAnnotation(Time.class).timeout(), object, false).await();
-						for (Method aft : methods.get(After.class)) {
-							aft.setAccessible(true);
-							aft.invoke(object);
-						}
-						times++;
-						grapher.setProgress((double) times / repetitions, false);
-					}
-				}
-				for (Method method : methods.get(AfterClass.class)) {
-					method.setAccessible(true);
-					method.invoke(object);
-				}
-				AnnotationHandler clsHandler = new AnnotationHandler(cls);
-				graphFinish(clsHandler.isAnnotationPresent(Settings.class) && Arrays.stream(clsHandler.getAnnotation(Settings.class).value()).anyMatch(x -> x.equals(Setting.BEST_FIT)));
+		try {
+			Class<?>[] classes;
+			if (pkg.contains(".class")) {
+				classes = new Class[] { Class.forName(pkg.replace(".class", "")) };
+			} else {
+				classes = getClasses(pkg);
 			}
+			for (Class<?> cls : classes) {
+				if (isInstantiable(cls)) {
+					Constructor<?> constructor = cls.getDeclaredConstructor(); // This is to access any protected classes
+					constructor.setAccessible(true);
+					object = constructor.newInstance(); //
+					long repetitions = 0;
+					for (Method method : cls.getDeclaredMethods()) {
+						methodHandlers.put(method, new AnnotationHandler(method));
+						methods.put(methodHandlers.get(method).getAnnotations(), method);
+						if (methodHandlers.get(method).isAnnotationPresent(Time.class)) {
+							repetitions += methodHandlers.get(method).getAnnotation(Time.class).repeat();
+						}
+					}
+					warmup(constructor.newInstance(), timeMethod); // So instance variables are left default
+					for (Method method : methods.get(BeforeClass.class)) {
+						method.setAccessible(true);
+						method.invoke(object);
+					}
+					long times = 0;
+					for (Method method : methods.get(Time.class)) {
+						Series<Number, Number> data = new Series<>();
+						for (int i = 1; i <= methodHandlers.get(method).getAnnotation(Time.class).repeat(); i++) {
+							for (Method bef : methods.get(Before.class)) {
+								bef.setAccessible(true);
+								bef.invoke(object);
+							}
+							runWithTimeout(method, timeMethod, data, i, methodHandlers.get(method).getAnnotation(Time.class).timeout(), object, false).await();
+							for (Method aft : methods.get(After.class)) {
+								aft.setAccessible(true);
+								aft.invoke(object);
+							}
+							times++;
+							grapher.setProgress((double) times / repetitions, false);
+						}
+					}
+					for (Method method : methods.get(AfterClass.class)) {
+						method.setAccessible(true);
+						method.invoke(object);
+					}
+					AnnotationHandler clsHandler = new AnnotationHandler(cls);
+					graphFinish(clsHandler.isAnnotationPresent(Settings.class) && Arrays.stream(clsHandler.getAnnotation(Settings.class).value()).anyMatch(x -> x.equals(Setting.BEST_FIT)));
+				}
+			}
+			latch.countDown();
+		} catch (InvocationTargetException e) {
+			throw e.getCause();
 		}
-		latch.countDown();
 	}
 
 	/**

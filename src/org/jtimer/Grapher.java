@@ -64,11 +64,6 @@ public class Grapher extends Application {
 	 */
 	private static Grapher grapher = null;
 	/**
-	 * Currently does not serve any other purpose besides getting the instance of
-	 * the line plot graph
-	 */
-	private Grapher linePlotGrapher = null;
-	/**
 	 * The latch for the grapher
 	 */
 	private static CountDownLatch latch = new CountDownLatch(1);
@@ -93,6 +88,10 @@ public class Grapher extends Application {
 	 * The actual scatter plot
 	 */
 	public XYChart<Number, Number> plot = new ScatterChart<>(xAxis, yAxis);
+	/**
+	 * The chart that will be used for the line of best fit
+	 */
+	private XYChart<Number, Number> bestFitPlot = null;
 	/**
 	 * The pane that houses the ScatterChart {@link org.jtimer.Grapher#plot}
 	 */
@@ -134,7 +133,7 @@ public class Grapher extends Application {
 				chooser.setTitle("Select where to save the graph...");
 				chooser.setInitialDirectory(new File(System.getProperty("user.home") + "/Desktop"));
 				File output = chooser.showSaveDialog(stage);
-				WritableImage image = plot.snapshot(new SnapshotParameters(), null);
+				WritableImage image = pane.snapshot(new SnapshotParameters(), null);
 				try {
 					if (output != null) {
 						ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", output);
@@ -153,53 +152,59 @@ public class Grapher extends Application {
 	 * Adds a zooming feature into the scatter plot.
 	 */
 	private void addZoomer() {
-		Rectangle selectionVisual = new Rectangle(); // This is for visuals
-		Point selection = new Point();
+		for (XYChart<Number, Number> chart : new XYChart[] { plot, bestFitPlot }) {
+			if (chart != null) {
+				Rectangle selectionVisual = new Rectangle(); // This is for visuals
+				Point selection = new Point();
 
-		plot.setOnMousePressed(e -> {
-			if (e.getButton() == MouseButton.PRIMARY && e.isControlDown()) {
-				selection.setX(e.getSceneX());
-				selection.setY(e.getSceneY());
-				selectionVisual.setX(e.getSceneX());
-				selectionVisual.setY(e.getSceneY());
-				selectionVisual.setFill(Color.TRANSPARENT);
-				selectionVisual.setStroke(Color.BLACK);
-				selectionVisual.getStrokeDashArray().add(5.0);
-				selectionVisual.setStrokeWidth(0.5);
-				pane.getChildren().add(selectionVisual);
-			} else if (e.getButton() == MouseButton.SECONDARY) {
-				prettifyView();
-			}
-		});
+				chart.setOnMousePressed(e -> {
+					if (e.getButton() == MouseButton.PRIMARY && e.isControlDown()) {
+						selection.setX(e.getSceneX());
+						selection.setY(e.getSceneY());
+						selectionVisual.setX(e.getSceneX());
+						selectionVisual.setY(e.getSceneY());
+						selectionVisual.setFill(Color.TRANSPARENT);
+						selectionVisual.setStroke(Color.BLACK);
+						selectionVisual.getStrokeDashArray().add(5.0);
+						selectionVisual.setStrokeWidth(0.5);
+						pane.getChildren().add(selectionVisual);
+					} else if (e.getButton() == MouseButton.SECONDARY) {
+						prettifyView(chart);
+					}
+				});
 
-		plot.setOnMouseDragged(e -> {
-			if (e.getButton() == MouseButton.PRIMARY && e.isControlDown()) {
-				selectionVisual.setWidth(Math.abs(e.getSceneX() - selection.getX()));
-				selectionVisual.setHeight(Math.abs(e.getSceneY() - selection.getY()));
-				selectionVisual.setX(Math.min(selection.getX(), e.getSceneX()));
-				selectionVisual.setY(Math.min(selection.getY(), e.getSceneY()));
-			}
-		});
+				chart.setOnMouseDragged(e -> {
+					if (e.getButton() == MouseButton.PRIMARY && e.isControlDown()) {
+						selectionVisual.setWidth(Math.abs(e.getSceneX() - selection.getX()));
+						selectionVisual.setHeight(Math.abs(e.getSceneY() - selection.getY()));
+						selectionVisual.setX(Math.min(selection.getX(), e.getSceneX()));
+						selectionVisual.setY(Math.min(selection.getY(), e.getSceneY()));
+					}
+				});
 
-		plot.setOnMouseReleased(e -> {
-			if (e.getButton() == MouseButton.PRIMARY && e.isControlDown()) {
-				pane.getChildren().remove(selectionVisual);
-				if (selectionVisual.getWidth() + selectionVisual.getHeight() > 2) { // Avoids just pressing
-					selectionVisual.setWidth(0);
-					selectionVisual.setHeight(0);
-					double x1 = xAxis.getValueForDisplay(xAxis.sceneToLocal(selection.getX(), 0).getX()).doubleValue();
-					double y1 = yAxis.getValueForDisplay(yAxis.sceneToLocal(0, selection.getY()).getY()).doubleValue();
-					double x2 = xAxis.getValueForDisplay(xAxis.sceneToLocal(e.getSceneX(), 0).getX()).doubleValue();
-					double y2 = yAxis.getValueForDisplay(yAxis.sceneToLocal(0, e.getSceneY()).getY()).doubleValue();
-					xAxis.setLowerBound(Math.round(Math.min(x1, x2)));
-					xAxis.setUpperBound(Math.round(Math.max(x1, x2)));
-					xAxis.setTickUnit(Math.round((xAxis.getUpperBound() - xAxis.getLowerBound()) / 10));
-					yAxis.setLowerBound(Math.round(Math.min(y1, y2)));
-					yAxis.setUpperBound(Math.round(Math.max(y1, y2)));
-					yAxis.setTickUnit(Math.round((yAxis.getUpperBound() - yAxis.getLowerBound()) / 10));
-				}
+				chart.setOnMouseReleased(e -> {
+					if (e.getButton() == MouseButton.PRIMARY && e.isControlDown()) {
+						pane.getChildren().remove(selectionVisual);
+						if (selectionVisual.getWidth() + selectionVisual.getHeight() > 2) { // Avoids just pressing
+							selectionVisual.setWidth(0);
+							selectionVisual.setHeight(0);
+							NumberAxis xAxis = (NumberAxis) chart.getXAxis();
+							NumberAxis yAxis = (NumberAxis) chart.getYAxis();
+							double x1 = xAxis.getValueForDisplay(xAxis.sceneToLocal(selection.getX(), 0).getX()).doubleValue();
+							double y1 = yAxis.getValueForDisplay(yAxis.sceneToLocal(0, selection.getY()).getY()).doubleValue();
+							double x2 = xAxis.getValueForDisplay(xAxis.sceneToLocal(e.getSceneX(), 0).getX()).doubleValue();
+							double y2 = yAxis.getValueForDisplay(yAxis.sceneToLocal(0, e.getSceneY()).getY()).doubleValue();
+							xAxis.setLowerBound(Math.round(Math.min(x1, x2)));
+							xAxis.setUpperBound(Math.round(Math.max(x1, x2)));
+							xAxis.setTickUnit(Math.round((xAxis.getUpperBound() - xAxis.getLowerBound()) / 10));
+							yAxis.setLowerBound(Math.round(Math.min(y1, y2)));
+							yAxis.setUpperBound(Math.round(Math.max(y1, y2)));
+							yAxis.setTickUnit(Math.round((yAxis.getUpperBound() - yAxis.getLowerBound()) / 10));
+						}
+					}
+				});
 			}
-		});
+		}
 	}
 
 	/**
@@ -215,9 +220,6 @@ public class Grapher extends Application {
 			if (isRunning) {
 				this.graphTitle += " - ";
 				plot.setTitle(plot.getTitle() + " - ");
-			}
-			if (linePlotGrapher != null) {
-				linePlotGrapher.setGraphTitle(graphTitle);
 			}
 		});
 	}
@@ -243,9 +245,6 @@ public class Grapher extends Application {
 	public void setxDesc(String xDesc) {
 		Platform.runLater(() -> {
 			xAxis.setLabel(xDesc);
-			if (linePlotGrapher != null) {
-				linePlotGrapher.setxDesc(xDesc);
-			}
 		});
 	}
 
@@ -257,9 +256,6 @@ public class Grapher extends Application {
 	public void setyDesc(String yDesc) {
 		Platform.runLater(() -> {
 			yAxis.setLabel(yDesc);
-			if (linePlotGrapher != null) {
-				linePlotGrapher.setyDesc(yDesc);
-			}
 		});
 	}
 
@@ -271,9 +267,6 @@ public class Grapher extends Application {
 	 */
 	public void setMax(double max) {
 		this.max = max;
-		if (linePlotGrapher != null) {
-			linePlotGrapher.setMax(max);
-		}
 	}
 
 	/**
@@ -284,9 +277,6 @@ public class Grapher extends Application {
 	 */
 	public void setMaxDeviations(double maxDeviations) {
 		this.maxDeviations = maxDeviations;
-		if (linePlotGrapher != null) {
-			linePlotGrapher.setMaxDeviations(maxDeviations);
-		}
 	}
 
 	/**
@@ -350,25 +340,29 @@ public class Grapher extends Application {
 			}
 			prettifyView();
 			addZoomer();
-			for (Node node : plot.getChildrenUnmodifiable()) {
-				if (node instanceof Legend) {
-					Legend legend = (Legend) node;
-					for (LegendItem item : legend.getItems()) {
-						for (Series<Number, Number> series : plot.getData()) {
-							if (series.getName().equals(item.getText())) {
-								item.getSymbol().setCursor(Cursor.HAND);
-								item.getSymbol().setOnMouseClicked(e -> {
-									if (e.getButton() == MouseButton.PRIMARY) {
-										for (Data<Number, Number> data : series.getData()) {
-											if (data.getNode() != null) {
-												data.getNode().setVisible(!data.getNode().isVisible());
-												item.getSymbol().setOpacity(If(data.getNode().isVisible()).Then(1d).Else(0.25));
+			for (XYChart<Number, Number> chart : new XYChart[] { plot, bestFitPlot }) {
+				if (chart != null) {
+					for (Node node : chart.getChildrenUnmodifiable()) {
+						if (node instanceof Legend) {
+							Legend legend = (Legend) node;
+							for (LegendItem item : legend.getItems()) {
+								for (Series<Number, Number> series : chart.getData()) {
+									if (series.getName().equals(item.getText())) {
+										item.getSymbol().setCursor(Cursor.HAND);
+										item.getSymbol().setOnMouseClicked(e -> {
+											if (e.getButton() == MouseButton.PRIMARY) {
+												for (Data<Number, Number> data : series.getData()) {
+													if (data.getNode() != null) {
+														data.getNode().setVisible(!data.getNode().isVisible());
+														item.getSymbol().setOpacity(If(data.getNode().isVisible()).Then(1d).Else(0.25));
+													}
+												}
+												prettifyView(chart);
 											}
-										}
-										prettifyView();
+										});
+										break;
 									}
-								});
-								break;
+								}
 							}
 						}
 					}
@@ -380,54 +374,73 @@ public class Grapher extends Application {
 	}
 
 	/**
-	 * "Prettifies" a graph by limiting the view of it to within
-	 * {@link org.jtimer.Grapher#maxDeviations} standard deviations Also makes the data points
-	 * on the graph a bit smaller since they're too big by default.
+	 * "Prettifies" all graphs by limiting the view of it to within
+	 * {@link org.jtimer.Grapher#maxDeviations} standard deviations Also makes the
+	 * data points on the graph a bit smaller since they're too big by default.
+	 * @see org.jtimer.Grapher#prettifyView(XYChart)
 	 */
 	private void prettifyView() {
-		double total = 0;
-		double maxX = 0;
-		int points = 0;
-		for (Series<Number, Number> dataPoint : plot.getData()) {
-			for (Data<Number, Number> data : dataPoint.getData()) {
-				data.getNode().setScaleX(0.7);
-				data.getNode().setScaleY(0.7);
-				if (data.getNode().isVisible()) {
-					total += data.getYValue().doubleValue();
-					points++;
-					if (maxX < data.getXValue().doubleValue()) {
-						maxX = data.getXValue().doubleValue();
-					}
-				}
-			}
+		for (XYChart<Number, Number> chart : new XYChart[] { plot, bestFitPlot }) {
+			prettifyView(chart);
 		}
-		double mean = total / points;
-		total = 0;
-		for (Series<Number, Number> dataPoint : plot.getData()) {
-			for (Data<Number, Number> data : dataPoint.getData()) {
-				if (data.getNode().isVisible()) {
-					total += Math.pow(data.getYValue().doubleValue() - mean, 2);
-				}
-			}
-		}
-		double deviation = Math.sqrt(total / points);
-		yAxis.setAutoRanging(false);
-		yAxis.setLowerBound(Math.round(If((mean - maxDeviations * deviation < 0) || (deviation == 0)).Then(0d).Else(mean - maxDeviations * deviation)));
-		yAxis.setUpperBound(Math.round(If(deviation != 0).Then(mean + maxDeviations * deviation).Else(2 * mean)));
-		yAxis.setTickUnit(Math.round((yAxis.getUpperBound() - yAxis.getLowerBound()) / 10));
-		xAxis.setAutoRanging(false);
-		xAxis.setLowerBound(0);
-		xAxis.setUpperBound(maxX);
-		xAxis.setTickUnit(Math.round(maxX / 10));
 	}
 
 	/**
-	 * Calculates the line of best fit using linear regression. <br>
+	 * "Prettifies" a graph by limiting the view of it to within
+	 * {@link org.jtimer.Grapher#maxDeviations} standard deviations Also makes the
+	 * data points on the graph a bit smaller since they're too big by default.
+	 */
+	private void prettifyView(XYChart<Number, Number> chart) {
+		if (chart != null) {
+			double total = 0;
+			double maxX = 0;
+			int points = 0;
+			for (Series<Number, Number> dataPoint : chart.getData()) {
+				for (Data<Number, Number> data : dataPoint.getData()) {
+					data.getNode().setScaleX(0.7);
+					data.getNode().setScaleY(0.7);
+					if (data.getNode().isVisible()) {
+						total += data.getYValue().doubleValue();
+						points++;
+						if (maxX < data.getXValue().doubleValue()) {
+							maxX = data.getXValue().doubleValue();
+						}
+					}
+				}
+			}
+			double mean = total / points;
+			total = 0;
+			for (Series<Number, Number> dataPoint : chart.getData()) {
+				for (Data<Number, Number> data : dataPoint.getData()) {
+					if (data.getNode().isVisible()) {
+						total += Math.pow(data.getYValue().doubleValue() - mean, 2);
+					}
+				}
+			}
+			double deviation = Math.sqrt(total / points);
+			NumberAxis xAxis = (NumberAxis) chart.getXAxis();
+			NumberAxis yAxis = (NumberAxis) chart.getYAxis();
+			yAxis.setAutoRanging(false);
+			yAxis.setLowerBound(Math.round(If((mean - maxDeviations * deviation < 0) || (deviation == 0)).Then(0d).Else(mean - maxDeviations * deviation)));
+			yAxis.setUpperBound(Math.round(If(deviation != 0).Then(mean + maxDeviations * deviation).Else(2 * mean)));
+			yAxis.setTickUnit(Math.round((yAxis.getUpperBound() - yAxis.getLowerBound()) / 10));
+			xAxis.setAutoRanging(false);
+			xAxis.setLowerBound(0);
+			xAxis.setUpperBound(maxX);
+			xAxis.setTickUnit(Math.round(maxX / 10));
+		}
+	}
+
+	/**
+	 * Calculates the line of best fit using regression. <br>
 	 * <b>CURRENTLY AN EXPERIMENTAL FEATURE</b>
 	 */
 	private void lineOfBestFit() {
-		linePlotGrapher = new Grapher();
-		XYChart<Number, Number> linePlotPlt = linePlotGrapher.plot;
+		NumberAxis bestFitXAxis = new NumberAxis();
+		NumberAxis bestFitYAxis = new NumberAxis();
+		bestFitXAxis.labelProperty().bind(xAxis.labelProperty());
+		bestFitYAxis.labelProperty().bind(yAxis.labelProperty());
+		bestFitPlot = new ScatterChart<Number, Number>(bestFitXAxis, bestFitYAxis);
 		TreeSet<Regression> regressions = null;
 		for (Series<Number, Number> series : plot.getData()) {
 			regressions = new TreeSet<>();
@@ -449,20 +462,18 @@ public class Grapher extends Application {
 				double fx = regressions.first().calculate(i);
 				dataSeries.getData().add(new Data<Number, Number>(i, If(fx < 0 || !Double.isFinite(fx)).Then(0d).Else(fx)));
 			}
-			linePlotPlt.getData().add(dataSeries);
+			bestFitPlot.getData().add(dataSeries);
 		}
-		Stage linePlotStage = new Stage();
-		Pane linePlotPane = new Pane();
-		Scene linePlotScene = new Scene(linePlotPane, 800, 600);
-		linePlotStage.setScene(linePlotScene);
-		linePlotPane.getChildren().add(linePlotPlt);
-		linePlotGrapher.start(linePlotStage);
-		linePlotGrapher.finish(false);
-		plot.getScene().getWindow().requestFocus();
+		pane.getChildren().add(bestFitPlot);
+		plot.prefHeightProperty().bind(pane.heightProperty().divide(2));
+		bestFitPlot.prefWidthProperty().bind(pane.widthProperty());
+		bestFitPlot.prefHeightProperty().bind(pane.heightProperty().divide(2));
+		bestFitPlot.layoutYProperty().bind(pane.heightProperty().divide(2));
 	}
 
 	/**
-	 * Gets the XS and YS of a series, used by {@link org.jtimer.Grapher#lineOfBestFit()}
+	 * Gets the XS and YS of a series, used by
+	 * {@link org.jtimer.Grapher#lineOfBestFit()}
 	 * 
 	 * @param series The series
 	 * @return A double[][] of xs and ys
