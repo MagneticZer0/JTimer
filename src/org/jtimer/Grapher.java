@@ -18,13 +18,14 @@ import com.sun.javafx.charts.Legend.LegendItem;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
+import javafx.scene.chart.Axis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
-import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
 import javafx.scene.effect.Light.Point;
@@ -33,6 +34,9 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -87,11 +91,11 @@ public class Grapher extends Application {
 	/**
 	 * The actual scatter plot
 	 */
-	public XYChart<Number, Number> plot = new ScatterChart<>(xAxis, yAxis);
+	public ScatterChart<Number, Number> plot = new ScatterChart<>(xAxis, yAxis);
 	/**
 	 * The chart that will be used for the line of best fit
 	 */
-	private XYChart<Number, Number> bestFitPlot = null;
+	private ScatterChart<Number, Number> bestFitPlot = null;
 	/**
 	 * The pane that houses the ScatterChart {@link org.jtimer.Grapher#plot}
 	 */
@@ -152,7 +156,7 @@ public class Grapher extends Application {
 	 * Adds a zooming feature into the scatter plot.
 	 */
 	private void addZoomer() {
-		for (XYChart<Number, Number> chart : new XYChart[] { plot, bestFitPlot }) {
+		for (ScatterChart<Number, Number> chart : new ScatterChart[] { plot, bestFitPlot }) {
 			if (chart != null) {
 				Rectangle selectionVisual = new Rectangle(); // This is for visuals
 				Point selection = new Point();
@@ -319,6 +323,55 @@ public class Grapher extends Application {
 	public void await() throws InterruptedException {
 		await.await();
 	}
+	
+	public void setTheme(Color color) {
+		double perBri = 0.299*color.getRed()+0.587*color.getGreen()+0.114*color.getBlue();
+		pane.setBackground(new Background(new BackgroundFill(color, CornerRadii.EMPTY, Insets.EMPTY)));
+		if (perBri > 0.5) {
+			setTextColor(Color.BLACK);
+		} else {
+			setTextColor(Color.WHITE);
+		}
+		for (ScatterChart<Number, Number> chart : new ScatterChart[] { plot, bestFitPlot }) {
+			if (chart != null) {
+				Color newColor = null;
+				if (perBri > 0.5) {
+					newColor = color.darker().darker();
+				} else {
+					newColor = color.brighter().brighter();
+				}
+				chart.lookup(".chart-legend").setStyle("-fx-background-color: " + newColor.toString().replaceAll("0x", "#") + ";");
+			}
+		}
+	}
+	
+	public void setTextColor(Color color) {
+		for (ScatterChart<Number, Number> chart : new ScatterChart[] { plot, bestFitPlot }) {
+			if (chart != null) {
+				String hexValue = color.toString().replaceAll("0x", "#");
+				double perBri = 0.299*color.getRed()+0.587*color.getGreen()+0.114*color.getBlue();
+				for(Axis<Number> axis  : new Axis[] { chart.getXAxis(), chart.getYAxis() }) {
+					axis.setTickLabelFill(color);
+					axis.lookup(".axis-tick-mark").setStyle("-fx-stroke: " + hexValue + ";");
+					if (!color.darker().darker().equals(color)) {
+						axis.lookup(".axis-minor-tick-mark").setStyle("-fx-stroke: " + color.darker().darker().toString().replaceAll("0x", "#") + ";");
+					} else {
+						axis.lookup(".axis-minor-tick-mark").setStyle("-fx-stroke: " + color.brighter().brighter().toString().replaceAll("0x", "#") + ";");
+					}
+				}
+				chart.lookup(".chart-plot-background").setStyle("-fx-background-color: transparent ;");
+				chart.lookup(".chart-title").setStyle("-fx-text-fill: " + hexValue + ";");
+				chart.lookup(".chart-vertical-grid-lines").setStyle("-fx-stroke: " + hexValue + ";");
+				chart.lookup(".chart-horizontal-grid-lines").setStyle("-fx-stroke: " + hexValue + ";");
+				for(Node axis : chart.lookupAll(".axis-label")) {
+					axis.setStyle("-fx-text-fill: " + hexValue + ";");
+				}
+				for(Node legendItem : chart.lookupAll(".chart-legend-item")) {
+					legendItem.setStyle("-fx-text-fill: " + hexValue + ";");
+				}
+			}
+		}
+	}
 
 	/**
 	 * Finishes a graph by:
@@ -340,7 +393,7 @@ public class Grapher extends Application {
 			}
 			prettifyView();
 			addZoomer();
-			for (XYChart<Number, Number> chart : new XYChart[] { plot, bestFitPlot }) {
+			for (ScatterChart<Number, Number> chart : new ScatterChart[] { plot, bestFitPlot }) {
 				if (chart != null) {
 					for (Node node : chart.getChildrenUnmodifiable()) {
 						if (node instanceof Legend) {
@@ -377,10 +430,10 @@ public class Grapher extends Application {
 	 * "Prettifies" all graphs by limiting the view of it to within
 	 * {@link org.jtimer.Grapher#maxDeviations} standard deviations Also makes the
 	 * data points on the graph a bit smaller since they're too big by default.
-	 * @see org.jtimer.Grapher#prettifyView(XYChart)
+	 * @see org.jtimer.Grapher#prettifyView(ScatterChart)
 	 */
 	private void prettifyView() {
-		for (XYChart<Number, Number> chart : new XYChart[] { plot, bestFitPlot }) {
+		for (ScatterChart<Number, Number> chart : new ScatterChart[] { plot, bestFitPlot }) {
 			prettifyView(chart);
 		}
 	}
@@ -390,7 +443,7 @@ public class Grapher extends Application {
 	 * {@link org.jtimer.Grapher#maxDeviations} standard deviations Also makes the
 	 * data points on the graph a bit smaller since they're too big by default.
 	 */
-	private void prettifyView(XYChart<Number, Number> chart) {
+	private void prettifyView(ScatterChart<Number, Number> chart) {
 		if (chart != null) {
 			double total = 0;
 			double maxX = 0;
