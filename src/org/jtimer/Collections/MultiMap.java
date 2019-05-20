@@ -9,8 +9,9 @@ import java.util.List;
 
 /**
  * A version of a Multi-Hashmap I created in order to make the code more
- * efficient. Internally, this is just a way of mapping a java annotation to a
- * list of objects, in my case Methods.
+ * efficient. Internally, this is just a way of mapping an
+ * {@link java.lang.annotation.Annotation Annotation} to a list of objects, in
+ * my case Methods.
  * 
  * @author MagneticZero
  *
@@ -19,23 +20,26 @@ import java.util.List;
 public class MultiMap<V> {
 
 	/**
-	 * The internal data structure of the {@link org.jtimer.Collections.MultiMap}
+	 * The internal data structure of the {@link org.jtimer.Collections.MultiMap
+	 * MultiMap}
 	 */
 	private HashMap<String, List<V>> internalMap;
 
 	/**
-	 * Creates a {@link org.jtimer.Collections.MultiMap} by instantiating the inner
-	 * data structure.
+	 * Creates a {@link org.jtimer.Collections.MultiMap MultiMap} by instantiating
+	 * the inner data structure.
 	 */
 	public MultiMap() {
 		internalMap = new HashMap<>();
 	}
 
 	/**
-	 * Puts a value into the map given a array of annotations
+	 * Puts a value into the map given a array of
+	 * {@link java.lang.annotation.Annotation annotations}
 	 * 
-	 * @param annotations The array of annotations, typically the object's
-	 *                    annotations.
+	 * @param annotations The array of {@link java.lang.annotation.Annotation
+	 *                    annotations}, typically the object's
+	 *                    {@link java.lang.annotation.Annotation annotations}.
 	 * @param value       The value to put into the map
 	 */
 	public void put(Collection<Annotation> annotations, V value) {
@@ -45,9 +49,11 @@ public class MultiMap<V> {
 	}
 
 	/**
-	 * Puts a value into the map given a single annotatoin
+	 * Puts a value into the map given a single
+	 * {@link java.lang.annotation.Annotation annotation}.
 	 * 
-	 * @param annotation The annotation that is essentially the key
+	 * @param annotation The {@link java.lang.annotation.Annotation annotation} that
+	 *                   is essentially the key
 	 * @param value      The value to put into the map
 	 */
 	public void put(Annotation annotation, V value) {
@@ -61,10 +67,13 @@ public class MultiMap<V> {
 	}
 
 	/**
-	 * Returns a list of objects that had the given annotation that you specified.
+	 * Returns a list of objects that had the given
+	 * {@link java.lang.annotation.Annotation annotation} that you specified.
 	 * 
-	 * @param annotation The annotation to get the objects for
-	 * @return Returns a list of objects that had this annotation as a key.
+	 * @param annotation The {@link java.lang.annotation.Annotation annotation}
+	 *                   class to get the objects for
+	 * @return Returns a list of objects that had this
+	 *         {@link java.lang.annotation.Annotation annotation} as a key
 	 */
 	public List<V> get(Class<? extends Annotation> annotation) {
 		if (internalMap.get(annotation.getCanonicalName()) == null) {

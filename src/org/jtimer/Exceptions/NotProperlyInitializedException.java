@@ -1,9 +1,9 @@
 package org.jtimer.Exceptions;
 
 /**
- * Used if an {@link org.jtimer.Readability.If} object's
- * {@link org.jtimer.Readability.If#Else(Object)} method is executed before the
- * {@link org.jtimer.Readability.If#Then(Object)} method.
+ * Used if an {@link org.jtimer.Readability.If If} object's
+ * {@link org.jtimer.Readability.If#Else(Object) Else} method is executed before
+ * the {@link org.jtimer.Readability.If#Then(Object) Then} method.
  * 
  * @author MagneticZero
  *

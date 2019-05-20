@@ -7,9 +7,9 @@ import java.util.HashMap;
 
 /**
  * An object that is able to handle all meta annotations of a
- * {@link java.lang.reflect.AnnotatedElement} object. If annotations are
- * repeated, then only the topmost annotation present will be the one returned,
- * if it's needed.
+ * {@link java.lang.reflect.AnnotatedElement AnnotatedElement} object. If
+ * annotations are repeated, then only the topmost annotation present will be
+ * the one returned, if it's needed.
  * 
  * @author MagneticZero
  *
@@ -17,7 +17,7 @@ import java.util.HashMap;
 public class AnnotationHandler {
 
 	/**
-	 * A mapping for annotation classes to the actual annotations
+	 * A mapping for annotation classes to the actual annotations.
 	 */
 	private HashMap<Class<? extends Annotation>, Annotation> annotations = new HashMap<>();
 	/**
@@ -27,7 +27,8 @@ public class AnnotationHandler {
 	private HashMap<Class<? extends Annotation>, Integer> levelMap = new HashMap<>();
 
 	/**
-	 * Creates an annotation handler for a Java AnnotatedElement Object
+	 * Creates an annotation handler for a Java
+	 * {@link java.lang.reflect.AnnotatedElement AnnotatedElement} object.
 	 * 
 	 * @param object The object to get the annotations of.
 	 */
@@ -55,7 +56,7 @@ public class AnnotationHandler {
 	}
 
 	/**
-	 * Returns all annotataions present for the object
+	 * Returns all annotataions present for the object.
 	 * 
 	 * @return All annotations present
 	 */
@@ -64,7 +65,7 @@ public class AnnotationHandler {
 	}
 
 	/**
-	 * Tells if a annotation is present within the object
+	 * Tells if a annotation is present within the object.
 	 * 
 	 * @param annotationType The annotation type to check for
 	 * @return Whether or not the annotation is preset

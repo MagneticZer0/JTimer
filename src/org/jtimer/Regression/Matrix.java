@@ -5,19 +5,19 @@ import java.util.Arrays;
 import org.jtimer.Exceptions.DimensionsInvalidException;
 
 /**
- * A custom matrix class I use to make things easier
+ * A custom matrix class I use to make things easier.
  * 
  * @author MagneticZero
  */
 public class Matrix {
 
 	/**
-	 * The internal data structure
+	 * The internal data structure.
 	 */
 	private Double[][] matrix;
 
 	/**
-	 * Creates an matrix of size i x j and sets all the elements to 0
+	 * Creates an matrix of size i x j and sets all the elements to 0.
 	 * 
 	 * @param i The number of rows
 	 * @param j The number of columns
@@ -32,7 +32,7 @@ public class Matrix {
 	}
 
 	/**
-	 * Creates a matrix using a specified doubly[][]
+	 * Creates a matrix using a specified double[][].
 	 * 
 	 * @param matrix The double[][] to transform
 	 */
@@ -46,7 +46,7 @@ public class Matrix {
 	}
 
 	/**
-	 * Adds 2 matrices and returns the result
+	 * Adds 2 matrices and returns the result.
 	 * 
 	 * @param other The matrix to add
 	 * @return The result
@@ -65,7 +65,7 @@ public class Matrix {
 	}
 
 	/**
-	 * Subtracts 2 matrices and returns the result
+	 * Subtracts 2 matrices and returns the result.
 	 * 
 	 * @param other The matrix to subtract
 	 * @return The result
@@ -84,7 +84,7 @@ public class Matrix {
 	}
 
 	/**
-	 * Multiplies a matrix by a scalar
+	 * Multiplies a matrix by a scalar.
 	 * 
 	 * @param other The scalar to multiply by
 	 * @return The result
@@ -100,7 +100,7 @@ public class Matrix {
 	}
 
 	/**
-	 * Multiplies 2 matrices and returns the result
+	 * Multiplies 2 matrices and returns the result.
 	 * 
 	 * @param other The matrix to multiply
 	 * @return The result
@@ -122,7 +122,7 @@ public class Matrix {
 	}
 
 	/**
-	 * Transposes a matrix and returns the result
+	 * Transposes a matrix and returns the result.
 	 * 
 	 * @return The transposed matrix
 	 */
@@ -137,7 +137,7 @@ public class Matrix {
 	}
 
 	/**
-	 * Inverts a matrix and returns the result
+	 * Inverts a matrix and returns the result.
 	 * 
 	 * @return The inverted matrix
 	 */
@@ -164,7 +164,7 @@ public class Matrix {
 	}
 
 	/**
-	 * Calculates the determinant of the matrix and returns it
+	 * Calculates the determinant of the matrix and returns it.
 	 * 
 	 * @return The determinant
 	 */
@@ -185,7 +185,7 @@ public class Matrix {
 	}
 
 	/**
-	 * Used to get a smaller sub-matrix by eliminating a row and column number
+	 * Used to get a smaller sub-matrix by eliminating a row and column number.
 	 * 
 	 * @param row The row to exclude
 	 * @param col The column to exlude
@@ -202,7 +202,7 @@ public class Matrix {
 		}
 		return new Matrix(result);
 	}
-	
+
 	/**
 	 * Creates an identity matrix that is size x size large.
 	 * 
@@ -218,7 +218,7 @@ public class Matrix {
 	}
 
 	/**
-	 * Returns the Matrix as a string
+	 * Returns the Matrix as a string.
 	 */
 	public String toString() {
 		StringBuffer string = new StringBuffer();
@@ -229,7 +229,7 @@ public class Matrix {
 	}
 
 	/**
-	 * Returns the array that the matrix is using
+	 * Returns the array that the matrix is using.
 	 * 
 	 * @return The Double[][] representing the matrix
 	 */

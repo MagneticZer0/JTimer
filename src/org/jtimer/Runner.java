@@ -31,7 +31,7 @@ import java.util.concurrent.CyclicBarrier;
  * timeout to methods, adds the data to a graph, recursively finds all methods
  * inside a package, etc. It does a lot and I should probably split things up a
  * bit just to make it look better. To get a more detailed look at what the
- * runner does make sure to look at the time method
+ * runner does make sure to look at the time method.
  * 
  * @see org.jtimer.Runner#time(String, TimeMethod)
  * 
@@ -40,23 +40,23 @@ import java.util.concurrent.CyclicBarrier;
 public class Runner {
 
 	/**
-	 * The graph to put data in
+	 * The graph to put the data collected in.
 	 */
 	private static Grapher grapher = Grapher.start();
 	/**
-	 * The test class that is being run
+	 * The test class that is being run.
 	 */
 	private static Object object;
 	/**
-	 * The thread use to track timeout
+	 * The thread use to track timeout.
 	 */
 	private static Thread time = new Thread();
 	/**
-	 * The timer to track timeout
+	 * The timer to track timeout.
 	 */
 	private static long timer = -1l;
 	/**
-	 * Used if someone wants to await the runner
+	 * Used if someone wants to await the runner.
 	 */
 	private static CountDownLatch latch = new CountDownLatch(2);
 	/**
@@ -64,23 +64,23 @@ public class Runner {
 	 */
 	private static MultiMap<Method> methods = new MultiMap<>();
 	/**
-	 * Since creating a {@link org.jtimer.Annotations.Handler.AnnotationHandler} could be quite taxing with meta
-	 * annotations, a way of mapping methods to their annotations handlers would be
-	 * efficient.
+	 * Since creating a {@link org.jtimer.Annotations.Handler.AnnotationHandler AnnotationHandler}
+	 * could be quite taxing with meta annotations, a way of mapping methods to
+	 * their annotations handlers would be efficient.
 	 */
 	private static HashMap<Method, AnnotationHandler> methodHandlers = new HashMap<>();
 
 	/**
 	 * Since everything is static there is no need to be able to instantiate a new
-	 * instance of Runner
+	 * instance of Runner.
 	 */
 	private Runner() {
 		throw new UnsupportedOperationException();
 	}
 
 	/**
-	 * Runs all @{@link org.jtimer.Annotations.Time} methods inside of the package
-	 * pkg. See {@link org.jtimer.Runner#time(String, TimeMethod)} for a more
+	 * Runs all {@link org.jtimer.Annotations.Time @Time} methods inside of the package
+	 * pkg. See {@link org.jtimer.Runner#time(String, TimeMethod) Runner.time(String TimeMethod)} for a more
 	 * detailed method that does the same thing.
 	 * 
 	 * @see Runner#time(String, TimeMethod)
@@ -109,24 +109,24 @@ public class Runner {
 	}
 
 	/**
-	 * This will execute all methods found in the timing package. If the class has
-	 * a @{@link org.jtimer.Annotations.Warmup} then all methods with
-	 * the @{@link org.jtimer.Annotations.Time} will be executed by the runner a
-	 * predefined amount of times. The order of operations is anything with
-	 * a @{@link org.jtimer.Annotations.BeforeClass} which is only once.
-	 * Then @{@link org.jtimer.Annotations.Before} is executed
-	 * before @{@link org.jtimer.Annotations.Time}, just like
-	 * JUnit @{@link org.jtimer.Annotations.Time} will execute followed
-	 * by @{@link org.jtimer.Annotations.After}.
-	 * Lastly @{@link org.jtimer.Annotations.AfterClass} is executed after
-	 * all @{@link org.jtimer.Annotations.Time} has been executed
+	 * This will execute all methods found in the timing package. If the class has a
+	 * {@link org.jtimer.Annotations.Warmup @Warmup} then all methods with the
+	 * {@link org.jtimer.Annotations.Time @Time} will be executed by the runner a
+	 * predefined amount of times. The order of operations is anything with a
+	 * {@link org.jtimer.Annotations.BeforeClass @BeforeClass} which is only once.
+	 * Then {@link org.jtimer.Annotations.Before @Before} is executed before each
+	 * {@link org.jtimer.Annotations.Time @Time}, just like JUnit
+	 * {@link org.jtimer.Annotations.Time @Time} will execute followed by
+	 * {@link org.jtimer.Annotations.After @After}. Lastly
+	 * {@link org.jtimer.Annotations.AfterClass @AfterClass} is executed after all
+	 * {@link org.jtimer.Annotations.Time @Time} have been executed.
 	 *
 	 * @param pkg        The package name that contains the things you want to time
 	 * @param timeMethod The functional interface for timing however you want
 	 * @throws Throwable This could be a number of things, although most things
 	 *                   should be already handeled by the Runner, there's a special
 	 *                   case though if the Exception is a
-	 *                   {@link java.lang.reflect.InvocationTargetException} then
+	 *                   {@link java.lang.reflect.InvocationTargetException InvocationTargetException} then
 	 *                   the Runner will unwrap the exception beforehand.
 	 */
 	public static void time(String pkg, TimeMethod timeMethod) throws Throwable {
@@ -209,13 +209,13 @@ public class Runner {
 
 	/**
 	 * Executed to warmup all the methods and your CPU, if you want. The class needs
-	 * the @{@link org.jtimer.Annotations.Warmup} annotation present in order for
-	 * this to be run. If present, it will run
-	 * all @{@link org.jtimer.Annotations.Time} annotated methods the defined amount
-	 * of times. This also handles all the class static variables by keeping track
-	 * of them and resetting them after the warmup has been executed back to the
-	 * initial values. It basically does all the same things
-	 * {@link org.jtimer.Runner#time(String)}
+	 * the {@link org.jtimer.Annotations.Warmup @Warmup} annotation present in order
+	 * for this to be run. If present, it will run all
+	 * {@link org.jtimer.Annotations.Time @Time} annotated methods the defined
+	 * amount of times. This also handles all the class static variables by keeping
+	 * track of them and resetting them after the warmup has been executed back to
+	 * the initial values. It basically does all the same things
+	 * {@link org.jtimer.Runner#time(String) Runner.time(String)}.
 	 * 
 	 * @param obj        The object to use
 	 * @param timeMethod The functional interface for timing however you want
@@ -273,7 +273,7 @@ public class Runner {
 	}
 
 	/**
-	 * Runs a method with a given timeout
+	 * Runs a method with a given timeout.
 	 * 
 	 * @param method     The method to run
 	 * @param timeMethod The time method to use to time it
@@ -334,7 +334,7 @@ public class Runner {
 	}
 
 	/**
-	 * Internal method used to add data to the graph
+	 * Internal method used to add data to the graph.
 	 * 
 	 * @param method The method to run
 	 * @param chart  The chart to add the data to
@@ -376,7 +376,8 @@ public class Runner {
 	}
 
 	/**
-	 * Finishes a graph by executing the {@link org.jtimer.Grapher#finish(boolean)} method.
+	 * Finishes a graph by executing the {@link org.jtimer.Grapher#finish(boolean)
+	 * Grapher.finish(boolean)} method.
 	 * 
 	 * @param bestFit Whether or not the best fit function should be calculated.
 	 * 
@@ -448,7 +449,7 @@ public class Runner {
 	}
 
 	/**
-	 * Tells if a class is instantiable by checking various thing
+	 * Tells if a class is instantiable by checking various thing.
 	 * 
 	 * @param cls The class to see
 	 * @return If it is instantiable
@@ -463,20 +464,21 @@ public class Runner {
 
 	/**
 	 * An interface used to change how things are timed. By default,
-	 * {@link TimeMethod.#timeMethod()} uses {@link java.lang.System#nanoTime()} and a method
-	 * to convert nanoseconds into your custom timing method
+	 * {@link TimeMethod#timeMethod() TimeMethod.timeMethod()} uses
+	 * {@link java.lang.System#nanoTime() System.nanoTime()} and a method to convert
+	 * nanoseconds into your custom timing method.
 	 */
 	public interface TimeMethod {
 		/**
 		 * A way to get System time however you want it, by default this is
-		 * {@link java.lang.System#nanoTime()}
+		 * {@link java.lang.System#nanoTime() System.nanoTime()}.
 		 * 
 		 * @return A time
 		 */
 		public long timeMethod();
 
 		/**
-		 * A way to convert nanoseconds into the method that you're using to time
+		 * A way to convert nanoseconds into the method that you're using to time.
 		 * 
 		 * @param nano Nanosecond input
 		 * @return Nanoseconds to your time method

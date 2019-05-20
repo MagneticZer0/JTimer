@@ -1,4 +1,4 @@
 /**
- * Contains various things that I don't ave a category for right now.
+ * Contains various things that I don't have a category for right now.
  */
 package org.jtimer.Misc;

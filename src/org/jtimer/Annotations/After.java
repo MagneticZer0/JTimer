@@ -4,7 +4,7 @@ import java.lang.annotation.*;
 
 /**
  * Used to specificy that a method should run after each repetition of a
- * time-loop
+ * time-loop.
  * 
  * @author MagneticZero
  */

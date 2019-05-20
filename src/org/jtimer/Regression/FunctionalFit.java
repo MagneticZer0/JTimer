@@ -8,16 +8,16 @@ package org.jtimer.Regression;
 public class FunctionalFit extends Regression {
 
 	/**
-	 * The coefficients of the regression
+	 * The coefficients of the regression.
 	 */
 	double[] coefficients;
 	/**
-	 * The function used
+	 * The function used.
 	 */
 	Function function;
 
 	/**
-	 * Creates a FunctionalFit that is in the form f(x) = function(x)+C
+	 * Creates a FunctionalFit that is in the form f(x) = function(x)+C.
 	 * 
 	 * @param xs       The x data
 	 * @param ys       The y data
@@ -29,7 +29,7 @@ public class FunctionalFit extends Regression {
 
 	/**
 	 * Creates a higher order FunctionalFit that is in the form of f(x) =
-	 * C+function(x) + ... + function(x)^degree-1
+	 * C+function(x) + ... + function(x)<sup>degree-1</sup>.
 	 * 
 	 * @param xs       The x data
 	 * @param ys       The y data
@@ -57,7 +57,7 @@ public class FunctionalFit extends Regression {
 	}
 
 	/**
-	 * Calculates f(x) using the generated regression
+	 * Calculates f(x) using the generated regression.
 	 * 
 	 * @param x The x to use
 	 * @return f(x) aka y
@@ -72,7 +72,7 @@ public class FunctionalFit extends Regression {
 	}
 
 	/**
-	 * A custom function interface to define the function to use
+	 * A custom function interface to define the function to use.
 	 */
 	public interface Function {
 		public double calc(double x);

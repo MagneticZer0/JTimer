@@ -1,19 +1,19 @@
 package org.jtimer.Regression;
 
 /**
- * Used to fit a set of data to polynomial
+ * Used to fit a set of data to polynomial.
  * 
  * @author MagneticZero
  */
 public class PolynomialFit extends Regression {
 
 	/**
-	 * The coefficients of the regression
+	 * The coefficients of the regression.
 	 */
 	double[] coefficients;
 
 	/**
-	 * Creates a PolynomialFit that will over-fit the data provided
+	 * Creates a PolynomialFit that will over-fit the data provided.
 	 * 
 	 * @param xs The x data
 	 * @param ys The y data
@@ -24,7 +24,7 @@ public class PolynomialFit extends Regression {
 
 	/**
 	 * Creates a higher order PolynomialFit that is in the form of f(x) = C+x + ...
-	 * + x^terms-1
+	 * + x<sup>terms-1</sup>.
 	 * 
 	 * @param xs    The x data
 	 * @param ys    The y data
@@ -50,7 +50,7 @@ public class PolynomialFit extends Regression {
 	}
 
 	/**
-	 * Calculates f(x) using the generated regression
+	 * Calculates f(x) using the generated regression.
 	 * 
 	 * @param x The x to use
 	 * @return f(x) aka y

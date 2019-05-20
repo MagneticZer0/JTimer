@@ -52,62 +52,69 @@ import javafx.stage.Stage;
 public class Grapher extends Application {
 
 	/**
-	 * Title of the graph
+	 * This is the title of the graph.
 	 */
 	private String graphTitle = "JTimer - ";
 	/**
-	 * Number axis for the x-axis
+	 * This if the Number Axis fot the x-axis of the main graph
+	 * {@link org.jtimer.Grapher#plot plot}.
 	 */
 	private NumberAxis xAxis = new NumberAxis();
 	/**
-	 * Number axis for the y-axis
+	 * This if the Number Axis fot the y-axis of the main graph
+	 * {@link org.jtimer.Grapher#plot plot}.
 	 */
 	private NumberAxis yAxis = new NumberAxis();
 	/**
-	 * The grapher object
+	 * This is the grapher object created.
 	 */
 	private static Grapher grapher = null;
 	/**
-	 * The latch for the grapher
+	 * This latch is used in the creation of the graph.
 	 */
 	private static CountDownLatch latch = new CountDownLatch(1);
 	/**
-	 * The maximum Y for the graph By default this is
-	 * {@link java.lang.Double#POSITIVE_INFINITY}
+	 * The maximum Y for the graph. By default this is
+	 * {@link java.lang.Double#POSITIVE_INFINITY infinity}.
 	 */
 	private double max = Double.POSITIVE_INFINITY;
 	/**
-	 * Max standard deviations shown in graph by default this is 2
+	 * Max standard deviations shown in graph by default this is 2. This,
+	 * theoretically, means that around 95% of data collected will be shown.
 	 */
 	private double maxDeviations = 2;
 	/**
-	 * If the timer is still running
+	 * If the runner is still going.
 	 */
 	private boolean isRunning = true;
 	/**
-	 * Keybind to save the graph By default this is CTRL + S
+	 * Keybind to save the graph By default this is CTRL + S.
 	 */
 	private KeyCombination save = new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN);
 	/**
-	 * The actual scatter plot
+	 * The main scatter chart, this is where all timed data will go.
 	 */
 	public ScatterChart<Number, Number> plot = new ScatterChart<>(xAxis, yAxis);
 	/**
-	 * The chart that will be used for the line of best fit
+	 * The scatter chat that will be used for the line of best fit.
 	 */
 	private ScatterChart<Number, Number> bestFitPlot = null;
 	/**
-	 * The pane that houses the ScatterChart {@link org.jtimer.Grapher#plot}
+	 * The pane that houses the {@link org.jtimer.Grapher#plot ScatterChart} and in
+	 * the case where a line of best fit is calculated it is shared with
+	 * {@link org.jtimer.Grapher#bestFitPlot best fit plot}.
 	 */
 	private Pane pane = new Pane();
 	/**
-	 * The latch that you can await
+	 * This is a latch for the grapher so that the runner can await it.
+	 * Theoretically, this should be released when the grapher has finished
+	 * everything.
 	 */
 	private CountDownLatch await = new CountDownLatch(1);
 
 	/**
-	 * Starts the grapher by labeling the axes, adding key listeners, and various
-	 * other things that pertain to the grapher.
+	 * Starts the grapher by setting up the essential components of the graph and
+	 * sets some default values.
 	 * 
 	 * @param stage the primary stage
 	 */
@@ -153,7 +160,8 @@ public class Grapher extends Application {
 	}
 
 	/**
-	 * Adds a zooming feature into the scatter plot.
+	 * Adds a zooming feature into the scatter plot. By default, the Control key
+	 * must be pressed in order to zoom into a graph.
 	 */
 	private void addZoomer() {
 		for (ScatterChart<Number, Number> chart : new ScatterChart[] { plot, bestFitPlot }) {
@@ -213,7 +221,8 @@ public class Grapher extends Application {
 
 	/**
 	 * Sets the graph title. If the time method is still running it will append a
-	 * percentage to the end of the title
+	 * percentage to the end of the title. If the warmup is still running, it will
+	 * append a warmup tag and a percentage to the end of the title.
 	 * 
 	 * @param graphTitle The title to set it to
 	 */
@@ -242,9 +251,9 @@ public class Grapher extends Application {
 	}
 
 	/**
-	 * Sets the string for the x-axis
+	 * Sets the label for the x-axis, by default this is "Repetitions."
 	 * 
-	 * @param xDesc The string for the x-axis
+	 * @param xDesc The string for the x-axis label
 	 */
 	public void setxDesc(String xDesc) {
 		Platform.runLater(() -> {
@@ -253,9 +262,9 @@ public class Grapher extends Application {
 	}
 
 	/**
-	 * Sets the string for the y-axis
+	 * Sets the label for the y-axis, by default this is "Time (ns)."
 	 * 
-	 * @param yDesc The string for the y-axis
+	 * @param yDesc The string for the y-axis label
 	 */
 	public void setyDesc(String yDesc) {
 		Platform.runLater(() -> {
@@ -264,8 +273,10 @@ public class Grapher extends Application {
 	}
 
 	/**
-	 * Sets the maximum value that the graph will graph. By default this is
-	 * {@link java.lang.Double#POSITIVE_INFINITY}
+	 * Sets the maximum value that the graph will graph. 
+	 * <br>
+	 * By default this is {@link java.lang.Double#POSITIVE_INFINITY infinity}, I.E. there is
+	 * no maximum value that the graph will not allow.
 	 * 
 	 * @param max The maximum value
 	 */
@@ -274,8 +285,11 @@ public class Grapher extends Application {
 	}
 
 	/**
-	 * Maximum amount of deviations the graph will show by default this is 2, so
-	 * data only within 2 standard deviations will be shown.
+	 * Maximum amount of deviations the graph will show. 
+	 * <br>
+	 * By default this is 2, so data only within 2 standard deviations will be
+	 * shown. Statisitcally, this means around 95% of the data collected will be
+	 * shown.
 	 * 
 	 * @param maxDeviations The maximum amount of deviations
 	 */
@@ -284,7 +298,7 @@ public class Grapher extends Application {
 	}
 
 	/**
-	 * This sets the grapher for the Singleton grapher class
+	 * This sets the grapher for the Singleton grapher class.
 	 * 
 	 * @param grapher0 The grapher to be set
 	 */
@@ -294,7 +308,7 @@ public class Grapher extends Application {
 	}
 
 	/**
-	 * Sets the instance of the grapher
+	 * Sets the instance of the grapher.
 	 */
 	public Grapher() {
 		setGrapher(this);
@@ -316,7 +330,7 @@ public class Grapher extends Application {
 	}
 
 	/**
-	 * Awaits the grapher to finish everything
+	 * Awaits the grapher to finish everything.
 	 * 
 	 * @throws InterruptedException If the latch throws an exception
 	 */
@@ -324,6 +338,13 @@ public class Grapher extends Application {
 		await.await();
 	}
 	
+	/**
+	 * Sets the theme of the grapher. What this will do is set the background color
+	 * of the graph as will as change the text color of the graph to make sure that
+	 * the text is readable.
+	 * 
+	 * @param color The color to set the theme around.
+	 */
 	public void setTheme(Color color) {
 		double perBri = 0.299*color.getRed()+0.587*color.getGreen()+0.114*color.getBlue();
 		pane.setBackground(new Background(new BackgroundFill(color, CornerRadii.EMPTY, Insets.EMPTY)));
@@ -345,6 +366,12 @@ public class Grapher extends Application {
 		}
 	}
 	
+	/**
+	 * Sets the text color of all text components on the graph as well as any tick
+	 * marks and graph lines.
+	 * 
+	 * @param color The color to set the text to
+	 */
 	public void setTextColor(Color color) {
 		for (ScatterChart<Number, Number> chart : new ScatterChart[] { plot, bestFitPlot }) {
 			if (chart != null) {
@@ -356,13 +383,14 @@ public class Grapher extends Application {
 					if (!color.darker().darker().equals(color)) {
 						axis.lookup(".axis-minor-tick-mark").setStyle("-fx-stroke: " + color.darker().darker().toString().replaceAll("0x", "#") + ";");
 					} else {
-						axis.lookup(".axis-minor-tick-mark").setStyle("-fx-stroke: " + color.brighter().brighter().toString().replaceAll("0x", "#") + ";");
+						axis.lookup(".axis-tick-mark").setStyle("-fx-stroke: " + color.darker().darker().toString().replaceAll("0x", "#") + ";");
+						axis.lookup(".axis-minor-tick-mark").setStyle("-fx-stroke: " + hexValue + ";");
 					}
 				}
 				chart.lookup(".chart-plot-background").setStyle("-fx-background-color: transparent ;");
 				chart.lookup(".chart-title").setStyle("-fx-text-fill: " + hexValue + ";");
-				chart.lookup(".chart-vertical-grid-lines").setStyle("-fx-stroke: " + hexValue + ";");
-				chart.lookup(".chart-horizontal-grid-lines").setStyle("-fx-stroke: " + hexValue + ";");
+				chart.lookup(".chart-vertical-grid-lines").setStyle("-fx-stroke: " + color.desaturate().toString().replaceAll("0x", "#") + ";");
+				chart.lookup(".chart-horizontal-grid-lines").setStyle("-fx-stroke: " + color.desaturate().toString().replaceAll("0x", "#") + ";");
 				for(Node axis : chart.lookupAll(".axis-label")) {
 					axis.setStyle("-fx-text-fill: " + hexValue + ";");
 				}
@@ -428,7 +456,7 @@ public class Grapher extends Application {
 
 	/**
 	 * "Prettifies" all graphs by limiting the view of it to within
-	 * {@link org.jtimer.Grapher#maxDeviations} standard deviations Also makes the
+	 * {@link org.jtimer.Grapher#maxDeviations the max deviations setting} standard deviations Also makes the
 	 * data points on the graph a bit smaller since they're too big by default.
 	 * @see org.jtimer.Grapher#prettifyView(ScatterChart)
 	 */
@@ -440,8 +468,11 @@ public class Grapher extends Application {
 
 	/**
 	 * "Prettifies" a graph by limiting the view of it to within
-	 * {@link org.jtimer.Grapher#maxDeviations} standard deviations Also makes the
-	 * data points on the graph a bit smaller since they're too big by default.
+	 * {@link org.jtimer.Grapher#maxDeviations the max deviations setting} standard
+	 * deviations Also makes the data points on the graph a bit smaller since
+	 * they're too big by default.
+	 * 
+	 * @param chart the chart to "prettify"
 	 */
 	private void prettifyView(ScatterChart<Number, Number> chart) {
 		if (chart != null) {
@@ -525,10 +556,10 @@ public class Grapher extends Application {
 	}
 
 	/**
-	 * Gets the XS and YS of a series, used by
-	 * {@link org.jtimer.Grapher#lineOfBestFit()}
+	 * Gets the X's and Y's of a series. this is used by
+	 * {@link org.jtimer.Grapher#lineOfBestFit() lineOfBestFit()}
 	 * 
-	 * @param series The series
+	 * @param series The series to get the data of.
 	 * @return A double[][] of xs and ys
 	 */
 	private double[][] getData(Series<Number, Number> series) {
@@ -545,7 +576,7 @@ public class Grapher extends Application {
 	 * Little helper function to improve code readability
 	 * 
 	 * @param conditional The conditional to check
-	 * @return An {@link org.jtimer.Readability.If} Object
+	 * @return An {@link org.jtimer.Readability.If If} object
 	 */
 	private If<Double> If(boolean conditional) {
 		return new If<Double>(conditional);

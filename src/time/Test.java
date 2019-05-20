@@ -13,6 +13,8 @@ import org.jtimer.Annotations.Time;
 import org.jtimer.Annotations.Warmup;
 import org.jtimer.Misc.Setting;
 
+import javafx.scene.paint.Color;
+
 @Settings(Setting.BEST_FIT)
 @Warmup(iterations = 500)
 public class Test {

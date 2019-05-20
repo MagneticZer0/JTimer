@@ -3,7 +3,7 @@ package org.jtimer.Readability;
 import org.jtimer.Exceptions.NotProperlyInitializedException;
 
 /**
- * This is a fancy ternary operator just used for code-readability
+ * This is a fancy ternary operator just used for code-readability.
  * 
  * @author MagneticZero
  *
@@ -12,7 +12,7 @@ import org.jtimer.Exceptions.NotProperlyInitializedException;
 public class If<V> {
 
 	/**
-	 * The conditional that will be checked
+	 * The conditional that will be checked.
 	 */
 	private boolean conditional;
 	/**
@@ -20,7 +20,7 @@ public class If<V> {
 	 */
 	private V thenValue;
 	/**
-	 * If the {@link org.jtimer.Readability.If#Then(Object)} has been executed.
+	 * If the {@link org.jtimer.Readability.If#Then(Object) Then} has been executed.
 	 */
 	private boolean thenExecuted = false;
 	/**
@@ -29,7 +29,8 @@ public class If<V> {
 	private V elseValue;
 
 	/**
-	 * Intialize the If object with the initial boolean
+	 * Intialize the {@link org.jtimer.Readability.If If} object with the initial
+	 * boolean.
 	 * 
 	 * @param conditional The boolean to test
 	 */
@@ -38,7 +39,7 @@ public class If<V> {
 	}
 
 	/**
-	 * This is used to set the value that is returned if the boolean is true
+	 * This is used to set the value that is returned if the boolean is true.
 	 * 
 	 * @param thenValue The value to return if true
 	 * @return Returns the If object for convenience
@@ -51,12 +52,13 @@ public class If<V> {
 
 	/**
 	 * This is used to set the value that is returned if the boolean is false. This
-	 * will also evaluate the expression and return the correct value
+	 * will also evaluate the expression and return the correct value.
 	 * 
 	 * @param elseValue The value to return if false
 	 * @return Returns the proper value
-	 * @throws NotProperlyInitializedException If {@link org.jtimer.Readability.If#Then(Object)} was not
-	 *                                         used before this.
+	 * @throws NotProperlyInitializedException If
+	 *                                         {@link org.jtimer.Readability.If#Then(Object)
+	 *                                         Then} was not used before this.
 	 */
 	public V Else(V elseValue) throws NotProperlyInitializedException {
 		this.elseValue = elseValue;
@@ -68,8 +70,9 @@ public class If<V> {
 	 * after the else method is used.
 	 * 
 	 * @return Returns the proper value
-	 * @throws NotProperlyInitializedException If {@link org.jtimer.Readability.If#Then(Object)} was not
-	 *                                         used before this.
+	 * @throws NotProperlyInitializedException If
+	 *                                         {@link org.jtimer.Readability.If#Then(Object)
+	 *                                         Then} was not used before this.
 	 */
 	private V exec() throws NotProperlyInitializedException {
 		if (!thenExecuted) {

@@ -10,16 +10,16 @@ package org.jtimer.Regression;
 public abstract class Regression implements Comparable<Regression> {
 
 	/**
-	 * The error for the regression
+	 * The error for the regression.
 	 */
 	private Double error = Double.NaN;
 	/**
-	 * The name for the regression
+	 * The name for the regression.
 	 */
 	private String name;
 
 	/**
-	 * Calculates the y for the given x using the specified method
+	 * Calculates the y for the given x using the specified method.
 	 * 
 	 * @param x The x to input
 	 * @return f(x) aka y
@@ -45,14 +45,14 @@ public abstract class Regression implements Comparable<Regression> {
 	}
 
 	/**
-	 * Comapres one regression to another by using the error
+	 * Comapres one regression to another by using the error.
 	 */
 	public int compareTo(Regression reg) {
 		return (int) Math.round((error - reg.error) * 100);
 	}
 
 	/**
-	 * A way to get the name
+	 * A way to get the name.
 	 */
 	public String toString() {
 		return name;
@@ -60,7 +60,7 @@ public abstract class Regression implements Comparable<Regression> {
 
 	/**
 	 * Sets the name of the Regression, this value is returned by
-	 * {@link org.jtimer.Regression.Regression#toString()}.
+	 * {@link org.jtimer.Regression.Regression#toString() toString()}.
 	 * 
 	 * @param name The name to set to
 	 * @return Just a convenience
