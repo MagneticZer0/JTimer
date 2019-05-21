@@ -1,11 +1,13 @@
 package org.jtimer.Collections;
 
 import java.lang.annotation.Annotation;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A version of a Multi-Hashmap I created in order to make the code more
@@ -17,19 +19,19 @@ import java.util.List;
  *
  * @param <V> The type of the value of the map
  */
-public class MultiMap<V> {
+public class AnnotationMap<V> {
 
 	/**
-	 * The internal data structure of the {@link org.jtimer.Collections.MultiMap
-	 * MultiMap}
+	 * The internal data structure of the
+	 * {@link org.jtimer.Collections.AnnotationMap AnnotationMap}
 	 */
 	private HashMap<String, List<V>> internalMap;
 
 	/**
-	 * Creates a {@link org.jtimer.Collections.MultiMap MultiMap} by instantiating
-	 * the inner data structure.
+	 * Creates a {@link org.jtimer.Collections.AnnotationMap AnnotationMap} by
+	 * instantiating the inner data structure.
 	 */
-	public MultiMap() {
+	public AnnotationMap() {
 		internalMap = new HashMap<>();
 	}
 

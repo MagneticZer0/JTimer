@@ -2,7 +2,7 @@ package org.jtimer;
 
 import org.jtimer.Annotations.*;
 import org.jtimer.Annotations.Handler.AnnotationHandler;
-import org.jtimer.Collections.MultiMap;
+import org.jtimer.Collections.AnnotationMap;
 import org.jtimer.Misc.Setting;
 
 import javafx.application.Platform;
@@ -54,21 +54,21 @@ public class Runner {
 	/**
 	 * The timer to track timeout.
 	 */
-	private static long timer = -1l;
+	private static long timer = -1;
 	/**
 	 * Used if someone wants to await the runner.
 	 */
 	private static CountDownLatch latch = new CountDownLatch(2);
 	/**
-	 * A multimap of methods that the Runner will execute.
+	 * A annotation map of methods that the Runner will execute.
 	 */
-	private static MultiMap<Method> methods = new MultiMap<>();
+	private static AnnotationMap<Method> methods;
 	/**
 	 * Since creating a {@link org.jtimer.Annotations.Handler.AnnotationHandler AnnotationHandler}
 	 * could be quite taxing with meta annotations, a way of mapping methods to
 	 * their annotations handlers would be efficient.
 	 */
-	private static HashMap<Method, AnnotationHandler> methodHandlers = new HashMap<>();
+	private static HashMap<Method, AnnotationHandler> methodHandlers;
 
 	/**
 	 * Since everything is static there is no need to be able to instantiate a new
@@ -131,6 +131,8 @@ public class Runner {
 	 */
 	public static void time(String pkg, TimeMethod timeMethod) throws Throwable {
 		try {
+			methods = new AnnotationMap<>();
+			methodHandlers = new HashMap<>();
 			Class<?>[] classes;
 			if (pkg.contains(".class")) {
 				classes = new Class[] { Class.forName(pkg.replace(".class", "")) };
