@@ -337,7 +337,7 @@ public class Grapher extends Application {
 	public void await() throws InterruptedException {
 		await.await();
 	}
-	
+
 	/**
 	 * Sets the theme of the grapher. What this will do is set the background color
 	 * of the graph as will as change the text color of the graph to make sure that
@@ -346,6 +346,7 @@ public class Grapher extends Application {
 	 * @param color The color to set the theme around.
 	 */
 	public void setTheme(Color color) {
+		Platform.runLater(() -> {
 		double perBri = 0.299*color.getRed()+0.587*color.getGreen()+0.114*color.getBlue();
 		pane.setBackground(new Background(new BackgroundFill(color, CornerRadii.EMPTY, Insets.EMPTY)));
 		if (perBri > 0.5) {
@@ -355,15 +356,14 @@ public class Grapher extends Application {
 		}
 		for (ScatterChart<Number, Number> chart : new ScatterChart[] { plot, bestFitPlot }) {
 			if (chart != null) {
-				Color newColor = null;
-				if (perBri > 0.5) {
-					newColor = color.darker().darker();
+				if (!color.darker().darker().equals(color)) {
+					chart.lookup(".chart-legend").setStyle("-fx-background-color: " + color.darker().darker().toString().replaceAll("0x", "#") + ";");
 				} else {
-					newColor = color.brighter().brighter();
+					chart.lookup(".chart-legend").setStyle("-fx-background-color: " + color.brighter().brighter().toString().replaceAll("0x", "#") + ";");
 				}
-				chart.lookup(".chart-legend").setStyle("-fx-background-color: " + newColor.toString().replaceAll("0x", "#") + ";");
 			}
 		}
+		});
 	}
 	
 	/**
@@ -373,6 +373,7 @@ public class Grapher extends Application {
 	 * @param color The color to set the text to
 	 */
 	public void setTextColor(Color color) {
+		Platform.runLater(() -> {
 		for (ScatterChart<Number, Number> chart : new ScatterChart[] { plot, bestFitPlot }) {
 			if (chart != null) {
 				String hexValue = color.toString().replaceAll("0x", "#");
@@ -399,6 +400,7 @@ public class Grapher extends Application {
 				}
 			}
 		}
+		});
 	}
 
 	/**
