@@ -70,12 +70,4 @@ public class FunctionalFit extends Regression {
 		}
 		return result;
 	}
-
-	/**
-	 * A custom function interface to define the function to use.
-	 */
-	public interface Function {
-		public double calc(double x);
-	}
-
 }
