@@ -8,7 +8,7 @@ package org.jtimer.Regression;
 public class FunctionalFit extends Regression {
 
 	/**
-	 * The coefficients of the regression.
+	 * The coefficients of the regression, &beta;<sub>n</sub>.
 	 */
 	double[] coefficients;
 	/**
@@ -17,11 +17,13 @@ public class FunctionalFit extends Regression {
 	Function function;
 
 	/**
-	 * Creates a FunctionalFit that is in the form f(x) = function(x)+C.
+	 * Creates a FunctionalFit that is in the form f(x) =
+	 * &beta;<sub>1</sub>+&beta;<sub>2</sub>*{@link org.jtimer.Regression.Function
+	 * f}(x).
 	 * 
 	 * @param xs       The x data
 	 * @param ys       The y data
-	 * @param function The function to use
+	 * @param function The {@link org.jtimer.Regression.Function function} to use
 	 */
 	public FunctionalFit(double[] xs, double[] ys, Function function) {
 		this(xs, ys, function, 2);
@@ -29,11 +31,13 @@ public class FunctionalFit extends Regression {
 
 	/**
 	 * Creates a higher order FunctionalFit that is in the form of f(x) =
-	 * C+function(x) + ... + function(x)<sup>degree-1</sup>.
+	 * &beta;<sub>1</sub>+&beta;<sub>2</sub>*{@link org.jtimer.Regression.Function
+	 * f}(x)+...+&beta;<sub>term-1</sub>*{@link org.jtimer.Regression.Function
+	 * f}(x)<sup>term-1</sup>.
 	 * 
 	 * @param xs       The x data
 	 * @param ys       The y data
-	 * @param function The function to use
+	 * @param function The {@link org.jtimer.Regression.Function function} to use
 	 * @param terms    The number of terms
 	 */
 	public FunctionalFit(double[] xs, double[] ys, Function function, int terms) {

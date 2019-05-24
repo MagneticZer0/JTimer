@@ -10,21 +10,26 @@ import java.util.Collection;
 public class FlexibleFunctionalFit extends Regression {
 
 	/**
-	 * The coefficients of the regression.
+	 * The coefficients of the regression, &beta;<sub>n</sub>.
 	 */
 	double[] coefficients;
 	/**
-	 * The function used.
+	 * The functions used.
 	 */
 	Function[] functions;
 
 	/**
-	 * Creates a FlexibleFunctionalFit that is in the form f(x) =
-	 * C+f<sub>1</sub>(x)+f<sub>2</sub>(x)... using an array of functions
+	 * Creates a {@link org.jtimer.Regression.FlexibleFunctionalFit
+	 * FlexibleFunctionalFit} that is in the form f(x) =
+	 * &beta;<sub>1</sub>+&beta;<sub>2</sub>*{@link org.jtimer.Regression.Function
+	 * f}<sub>1</sub>(x)+&beta;<sub>3</sub>*{@link org.jtimer.Regression.Function
+	 * f}<sub>2</sub>(x)+... using an array of functions. 
+	 * <br></br>
+	 * where &beta;<sub>n</sub> is a coefficient determined through regression.
 	 * 
-	 * @param xs       The x data
-	 * @param ys       The y data
-	 * @param function The function to use
+	 * @param xs        The x data
+	 * @param ys        The y data
+	 * @param functions The {@link org.jtimer.Regression.Function functions} to use
 	 */
 	public FlexibleFunctionalFit(double[] xs, double[] ys, Function... functions) {
 		this.functions = functions;
@@ -47,12 +52,17 @@ public class FlexibleFunctionalFit extends Regression {
 	}
 	
 	/**
-	 * Creates a FlexibleFunctionalFit that is in the form f(x) =
-	 * C+f<sub>1</sub>(x)+f<sub>2</sub>(x)... using a collection of functions
+	 * Creates a {@link org.jtimer.Regression.FlexibleFunctionalFit
+	 * FlexibleFunctionalFit} that is in the form f(x) =
+	 * &beta;<sub>1</sub>+&beta;<sub>2</sub>*{@link org.jtimer.Regression.Function
+	 * f}<sub>1</sub>(x)+&beta;<sub>3</sub>*{@link org.jtimer.Regression.Function
+	 * f}<sub>2</sub>(x)+... using a collection of functions. 
+	 * <br></br>
+	 * where &beta;<sub>n</sub> is a coefficient determined through regression.
 	 * 
 	 * @param xs        The x data
 	 * @param ys        The y data
-	 * @param functions The function to use
+	 * @param functions The {@link org.jtimer.Regression.Function functions} to use
 	 */
 	public FlexibleFunctionalFit(double[] xs, double[] ys, Collection<Function> functions) {
 		this(xs, ys, functions.toArray(new Function[functions.size()]));

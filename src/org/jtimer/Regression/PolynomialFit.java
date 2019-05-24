@@ -23,8 +23,8 @@ public class PolynomialFit extends Regression {
 	}
 
 	/**
-	 * Creates a higher order PolynomialFit that is in the form of f(x) = C+x + ...
-	 * + x<sup>terms-1</sup>.
+	 * Creates a higher order PolynomialFit that is in the form of f(x) =
+	 * C+x+...+x<sup>terms-1</sup>.
 	 * 
 	 * @param xs    The x data
 	 * @param ys    The y data
