@@ -17,7 +17,8 @@ public class Matrix {
 	private Double[][] matrix;
 
 	/**
-	 * Creates an matrix of size i x j and sets all the elements to 0.
+	 * Creates an {@link org.jtimer.Regression.Matrix matrix} of size <i>i</i> x
+	 * <i>j</i> and sets all the elements to 0.
 	 * 
 	 * @param i The number of rows
 	 * @param j The number of columns
@@ -32,9 +33,10 @@ public class Matrix {
 	}
 
 	/**
-	 * Creates a matrix using a specified double[][].
+	 * Creates a {@link org.jtimer.Regression.Matrix matrix} using a specified
+	 * double[][].
 	 * 
-	 * @param matrix The double[][] to transform
+	 * @param matrix The double[][] to transform into a matrix
 	 */
 	public Matrix(Number[][] matrix) {
 		this(matrix.length, matrix[0].length);
@@ -46,12 +48,16 @@ public class Matrix {
 	}
 
 	/**
-	 * Adds 2 matrices and returns the result.
+	 * Adds 2 {@link org.jtimer.Regression.Matrix matrices} and returns the result
+	 * as a {@link org.jtimer.Regression.Matrix matrix}.
 	 * 
-	 * @param other The matrix to add
+	 * @param other The {@link org.jtimer.Regression.Matrix matrix} to add
 	 * @return The result
+	 * @throws DimensionsInvalidException If the 2
+	 *                                    {@link org.jtimer.Regression.Matrix
+	 *                                    matrices} do not have the same dimensions
 	 */
-	public Matrix add(Matrix other) {
+	public Matrix add(Matrix other) throws DimensionsInvalidException {
 		if (matrix.length != other.matrix.length || matrix[0].length != other.matrix[0].length) {
 			throw new DimensionsInvalidException();
 		}
@@ -65,12 +71,16 @@ public class Matrix {
 	}
 
 	/**
-	 * Subtracts 2 matrices and returns the result.
+	 * Subtracts 2 {@link org.jtimer.Regression.Matrix matrices} and returns the
+	 * result as a {@link org.jtimer.Regression.Matrix matrix}.
 	 * 
-	 * @param other The matrix to subtract
+	 * @param other The {@link org.jtimer.Regression.Matrix matrix} to add
 	 * @return The result
+	 * @throws DimensionsInvalidException If the 2
+	 *                                    {@link org.jtimer.Regression.Matrix
+	 *                                    matrices} do not have the same dimensions
 	 */
-	public Matrix subtract(Matrix other) {
+	public Matrix subtract(Matrix other) throws DimensionsInvalidException {
 		if (matrix.length != other.matrix.length || matrix[0].length != other.matrix[0].length) {
 			throw new DimensionsInvalidException();
 		}
@@ -84,7 +94,8 @@ public class Matrix {
 	}
 
 	/**
-	 * Multiplies a matrix by a scalar.
+	 * Multiplies a {@link org.jtimer.Regression.Matrix matrix} by a scalar as
+	 * returns the result as a {@link org.jtimer.Regression.Matrix matrix}.
 	 * 
 	 * @param other The scalar to multiply by
 	 * @return The result
@@ -100,12 +111,21 @@ public class Matrix {
 	}
 
 	/**
-	 * Multiplies 2 matrices and returns the result.
+	 * Multiplies 2 {@link org.jtimer.Regression.Matrix matrices} and returns the
+	 * result as a {@link org.jtimer.Regression.Matrix matrix}.
+	 * <br>
+	 * Note: In order to multiply 2 {@link org.jtimer.Regression.Matrix matrices}
+	 * the sizes need to be <i>i</i> x <i>j</i> and <i>j</i> x <i>f</i>. The result
+	 * will be an <i>i</i> x <i>f</i> matrix.
 	 * 
-	 * @param other The matrix to multiply
+	 * @param other The {@link org.jtimer.Regression.Matrix matrix} to multiply
 	 * @return The result
+	 * @throws DimensionsInvalidException If the 2
+	 *                                    {@link org.jtimer.Regression.Matrix
+	 *                                    matrices} do not have compatible
+	 *                                    dimensions
 	 */
-	public Matrix multiply(Matrix other) {
+	public Matrix multiply(Matrix other) throws DimensionsInvalidException {
 		if (this.matrix[0].length != other.matrix.length) {
 			throw new DimensionsInvalidException();
 		} else {
@@ -122,7 +142,8 @@ public class Matrix {
 	}
 
 	/**
-	 * Transposes a matrix and returns the result.
+	 * Transposes a {@link org.jtimer.Regression.Matrix matrix} and returns the
+	 * result as a {@link org.jtimer.Regression.Matrix matrix}.
 	 * 
 	 * @return The transposed matrix
 	 */
@@ -137,12 +158,19 @@ public class Matrix {
 	}
 
 	/**
-	 * Inverts a matrix and returns the result.
+	 * Inverts a {@link org.jtimer.Regression.Matrix matrix} and returns the result
+	 * as a {@link org.jtimer.Regression.Matrix matrix}.
 	 * 
 	 * @return The inverted matrix
+	 * @throws DimensionsInvalidException If the {@link org.jtimer.Regression.Matrix
+	 *                                    matrix} is not a square
+	 *                                    {@link org.jtimer.Regression.Matrix
+	 *                                    matrix}
 	 */
-	public Matrix inverse() {
-		if (matrix.length == matrix[0].length) {
+	public Matrix inverse() throws DimensionsInvalidException {
+		if (matrix.length != matrix[0].length) {
+			throw new DimensionsInvalidException();
+		} else {
 			Double[][] result = new Matrix(matrix.length, matrix.length).toArray();
 			for (int i = 0; i < matrix.length; i++) {
 				for (int j = 0; j < matrix.length; j++) {
@@ -158,18 +186,23 @@ public class Matrix {
 				}
 			}
 			return new Matrix(result);
-		} else {
-			throw new DimensionsInvalidException();
 		}
 	}
 
 	/**
-	 * Calculates the determinant of the matrix and returns it.
+	 * Calculates the determinant of the {@link org.jtimer.Regression.Matrix matrix}
+	 * and returns it.
 	 * 
 	 * @return The determinant
+	 * @throws DimensionsInvalidException If the {@link org.jtimer.Regression.Matrix
+	 *                                    matrix} is not a square
+	 *                                    {@link org.jtimer.Regression.Matrix
+	 *                                    matrix}
 	 */
 	public Double determinant() {
-		if (matrix.length == matrix[0].length) {
+		if (matrix.length != matrix[0].length) {
+			throw new DimensionsInvalidException();
+		} else {
 			if (matrix.length == 1) {
 				return matrix[0][0];
 			} else {
@@ -179,13 +212,12 @@ public class Matrix {
 				}
 				return determinant;
 			}
-		} else {
-			throw new DimensionsInvalidException();
 		}
 	}
 
 	/**
-	 * Used to get a smaller sub-matrix by eliminating a row and column number.
+	 * Used to get a smaller {@link org.jtimer.Regression.Matrix sub-matrix} by
+	 * eliminating a row and column number.
 	 * 
 	 * @param row The row to exclude
 	 * @param col The column to exlude
@@ -204,7 +236,12 @@ public class Matrix {
 	}
 
 	/**
-	 * Creates an identity matrix that is size x size large.
+	 * Creates an identity {@link org.jtimer.Regression.Matrix matrix} that is
+	 * <i>size</i> x <i>size</i> large.
+	 * <br>
+	 * The identity has the property that <b>A</b><sub><i>n</i> x <i>n</i></sub> x
+	 * <b>I</b><sub><i>n</i> x <i>n</i></sub> = <b>A</b><sub><i>n</i> x
+	 * <i>n</i></sub>
 	 * 
 	 * @param size The size of the identity matrix
 	 * @return Returns the newly created identity matrix.
@@ -218,7 +255,8 @@ public class Matrix {
 	}
 
 	/**
-	 * Returns the Matrix as a string.
+	 * Returns the string representation of the {@link org.jtimer.Regression.Matrix
+	 * matrix}.
 	 */
 	public String toString() {
 		StringBuffer string = new StringBuffer();
@@ -229,9 +267,11 @@ public class Matrix {
 	}
 
 	/**
-	 * Returns the array that the matrix is using.
+	 * Returns the internal array that the {@link org.jtimer.Regression.Matrix
+	 * matrix} is using.
 	 * 
-	 * @return The Double[][] representing the matrix
+	 * @return The Double[][] representing the {@link org.jtimer.Regression.Matrix
+	 *         matrix}
 	 */
 	public Double[][] toArray() {
 		return matrix.clone();

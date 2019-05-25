@@ -1,6 +1,6 @@
 package org.jtimer.Annotations.Handler;
 
-import java.lang.annotation.*;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.util.Collection;
 import java.util.HashMap;
@@ -81,6 +81,7 @@ public class AnnotationHandler {
 	 * @param annotationType The class for the annotation you want
 	 * @return The annotation object you want.
 	 */
+	@SuppressWarnings("unchecked")
 	public <T extends Annotation> T getAnnotation(Class<T> annotationType) {
 		if (isAnnotationPresent(annotationType)) {
 			return (T) annotations.get(annotationType);

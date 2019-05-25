@@ -20,6 +20,8 @@ public class FunctionalFit extends Regression {
 	 * Creates a FunctionalFit that is in the form f(x) =
 	 * &beta;<sub>1</sub>+&beta;<sub>2</sub>*{@link org.jtimer.Regression.Function
 	 * f}(x).
+	 * <br><br>
+	 * where &beta;<sub>n</sub> is a coefficient determined through regression.
 	 * 
 	 * @param xs       The x data
 	 * @param ys       The y data
@@ -34,6 +36,8 @@ public class FunctionalFit extends Regression {
 	 * &beta;<sub>1</sub>+&beta;<sub>2</sub>*{@link org.jtimer.Regression.Function
 	 * f}(x)+...+&beta;<sub>term-1</sub>*{@link org.jtimer.Regression.Function
 	 * f}(x)<sup>term-1</sup>.
+	 * <br><br>
+	 * where &beta;<sub>n</sub> is a coefficient determined through regression.
 	 * 
 	 * @param xs       The x data
 	 * @param ys       The y data

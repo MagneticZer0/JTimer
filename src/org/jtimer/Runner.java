@@ -1,14 +1,5 @@
 package org.jtimer;
 
-import org.jtimer.Annotations.*;
-import org.jtimer.Annotations.Handler.AnnotationHandler;
-import org.jtimer.Collections.AnnotationMap;
-import org.jtimer.Misc.Setting;
-
-import javafx.application.Platform;
-import javafx.scene.chart.XYChart;
-import javafx.scene.chart.XYChart.Series;
-
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -26,6 +17,22 @@ import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
 
+import org.jtimer.Annotations.After;
+import org.jtimer.Annotations.AfterClass;
+import org.jtimer.Annotations.Before;
+import org.jtimer.Annotations.BeforeClass;
+import org.jtimer.Annotations.DisplayName;
+import org.jtimer.Annotations.Settings;
+import org.jtimer.Annotations.Time;
+import org.jtimer.Annotations.Warmup;
+import org.jtimer.Annotations.Handler.AnnotationHandler;
+import org.jtimer.Collections.AnnotationMap;
+import org.jtimer.Misc.Setting;
+
+import javafx.application.Platform;
+import javafx.scene.chart.XYChart;
+import javafx.scene.chart.XYChart.Series;
+
 /**
  * The brains behind everything I'd say. This is what times methods, adds
  * timeout to methods, adds the data to a graph, recursively finds all methods
@@ -40,7 +47,7 @@ import java.util.concurrent.CyclicBarrier;
 public class Runner {
 
 	/**
-	 * The graph to put the data collected in.
+	 * The {@link org.jtimer.Grapher graph} to put the data collected in.
 	 */
 	private static Grapher grapher = Grapher.start();
 	/**
@@ -48,7 +55,7 @@ public class Runner {
 	 */
 	private static Object object;
 	/**
-	 * The thread use to track timeout.
+	 * The {@link java.lang.Thread thread} use to track timeout.
 	 */
 	private static Thread time = new Thread();
 	/**
@@ -56,41 +63,50 @@ public class Runner {
 	 */
 	private static long timer = -1;
 	/**
-	 * Used if someone wants to await the runner.
+	 * Used if someone wants to {@link java.util.concurrent.CountDownLatch#await()
+	 * await} the {@link org.jtimer.Runner runner}.
 	 */
 	private static CountDownLatch latch = new CountDownLatch(2);
 	/**
-	 * A annotation map of methods that the Runner will execute.
+	 * A {@link org.jtimer.Collections.AnnotationMap annotation map} of
+	 * {@link java.lang.reflect.Method methods} that the {@link org.jtimer.Runner
+	 * runner} will {@link java.lang.reflect.Method#invoke(Object, Object...)
+	 * execute}.
 	 */
 	private static AnnotationMap<Method> methods;
 	/**
-	 * Since creating a {@link org.jtimer.Annotations.Handler.AnnotationHandler AnnotationHandler}
-	 * could be quite taxing with meta annotations, a way of mapping methods to
-	 * their annotations handlers would be efficient.
+	 * Since creating a {@link org.jtimer.Annotations.Handler.AnnotationHandler
+	 * AnnotationHandler} could be quite taxing with meta annotations, a way of
+	 * mapping methods to their
+	 * {@link org.jtimer.Annotations.Handler.AnnotationHandler annotation handlers}
+	 * would be efficient.
 	 */
 	private static HashMap<Method, AnnotationHandler> methodHandlers;
 
 	/**
 	 * Since everything is static there is no need to be able to instantiate a new
-	 * instance of Runner.
+	 * instance of {@link org.jtimer.Runner Runner}.
 	 */
 	private Runner() {
 		throw new UnsupportedOperationException();
 	}
 
 	/**
-	 * Runs all {@link org.jtimer.Annotations.Time @Time} methods inside of the package
-	 * pkg. See {@link org.jtimer.Runner#time(String, TimeMethod) Runner.time(String TimeMethod)} for a more
-	 * detailed method that does the same thing.
+	 * Runs all {@link org.jtimer.Annotations.Time @Time} methods inside of the
+	 * package pkg. See {@link org.jtimer.Runner#time(String, TimeMethod)
+	 * Runner.time(String TimeMethod)} for a more detailed method that does the same
+	 * thing.
 	 * 
 	 * @see Runner#time(String, TimeMethod)
 	 * 
 	 * @param pkg The package name that contains the things you want to time
 	 * @throws Throwable This could be a number of things, although most things
-	 *                   should be already handeled by the Runner, there's a special
-	 *                   case though if the Exception is a
-	 *                   {@link java.lang.reflect.InvocationTargetException} then
-	 *                   the Runner will unwrap the exception beforehand.
+	 *                   should be already handeled by the {@link org.jtimer.Runner
+	 *                   Runner}, there's a special case though if the
+	 *                   {@link java.lang.Exception Exception} is a
+	 *                   {@link java.lang.reflect.InvocationTargetException
+	 *                   InvocationTargetException} then the Runner will unwrap the
+	 *                   exception beforehand and then throw that.
 	 */
 	public static void time(String pkg) throws Throwable {
 		time(pkg, new TimeMethod() {
@@ -109,10 +125,12 @@ public class Runner {
 	}
 
 	/**
-	 * This will execute all methods found in the timing package. If the class has a
-	 * {@link org.jtimer.Annotations.Warmup @Warmup} then all methods with the
-	 * {@link org.jtimer.Annotations.Time @Time} will be executed by the runner a
-	 * predefined amount of times. The order of operations is anything with a
+	 * This will {@link java.lang.reflect.Method#invoke(Object, Object...) execute}
+	 * all {@link java.lang.reflect.Method methods} found in the timing package. If
+	 * the class has a {@link org.jtimer.Annotations.Warmup @Warmup} then all
+	 * methods with the {@link org.jtimer.Annotations.Time @Time} will be executed
+	 * by the {@link org.jtimer.Runner runner} a predefined amount of times. The
+	 * order of operations is anything with a
 	 * {@link org.jtimer.Annotations.BeforeClass @BeforeClass} which is only once.
 	 * Then {@link org.jtimer.Annotations.Before @Before} is executed before each
 	 * {@link org.jtimer.Annotations.Time @Time}, just like JUnit
@@ -124,10 +142,12 @@ public class Runner {
 	 * @param pkg        The package name that contains the things you want to time
 	 * @param timeMethod The functional interface for timing however you want
 	 * @throws Throwable This could be a number of things, although most things
-	 *                   should be already handeled by the Runner, there's a special
-	 *                   case though if the Exception is a
-	 *                   {@link java.lang.reflect.InvocationTargetException InvocationTargetException} then
-	 *                   the Runner will unwrap the exception beforehand.
+	 *                   should be already handeled by the {@link org.jtimer.Runner
+	 *                   Runner}, there's a special case though if the
+	 *                   {@link java.lang.Exception Exception} is a
+	 *                   {@link java.lang.reflect.InvocationTargetException
+	 *                   InvocationTargetException} then the Runner will unwrap the
+	 *                   exception beforehand and then throw that.
 	 */
 	public static void time(String pkg, TimeMethod timeMethod) throws Throwable {
 		try {
@@ -189,19 +209,23 @@ public class Runner {
 	}
 
 	/**
-	 * Returns the grapher being used so that the user can set the graph settings.
+	 * Returns the {@link org.jtimer.Grapher grapher} being used so that the user
+	 * can set the graph settings.
 	 * 
-	 * @return The graph being used
+	 * @return The {@link org.jtimer.Grapher graph} being used
 	 */
 	public static Grapher getGrapher() {
 		return grapher;
 	}
 
 	/**
-	 * Provides a method that allows one to wait for the runner to execute all
-	 * things that need timing if they want to execute more things after it.
+	 * Provides a method that allows one to wait for the {@link org.jtimer.Runner
+	 * runner} to execute all things that need timing if they want to execute more
+	 * things after it.
 	 * 
-	 * @throws InterruptedException If the latch throws an InterruptedException
+	 * @throws InterruptedException If the {@link org.jtimer.Runner#latch latch}
+	 *                              throws an {@link java.lang.InterruptedException
+	 *                              InterruptedException}
 	 */
 	public static void await() throws InterruptedException {
 		latch.await();
@@ -210,9 +234,10 @@ public class Runner {
 	}
 
 	/**
-	 * Executed to warmup all the methods and your CPU, if you want. The class needs
-	 * the {@link org.jtimer.Annotations.Warmup @Warmup} annotation present in order
-	 * for this to be run. If present, it will run all
+	 * Executed to warmup all the {@link java.lang.reflect.Method methods} and your
+	 * CPU, if you want. The class needs the
+	 * {@link org.jtimer.Annotations.Warmup @Warmup} annotation present in order for
+	 * this to be run. If present, it will run all
 	 * {@link org.jtimer.Annotations.Time @Time} annotated methods the defined
 	 * amount of times. This also handles all the class static variables by keeping
 	 * track of them and resetting them after the warmup has been executed back to
@@ -222,9 +247,13 @@ public class Runner {
 	 * @param obj        The object to use
 	 * @param timeMethod The functional interface for timing however you want
 	 * @throws IllegalArgumentException  If the proper arguments are not given
-	 * @throws IllegalAccessException    If a method/field is not accessible
-	 * @throws InvocationTargetException If the method called throws an exception
-	 * @throws NoSuchFieldException      If a field doesn't exist
+	 * @throws IllegalAccessException    If a {@link java.lang.reflect.Method
+	 *                                   method}/{@link java.lang.reflect.Field
+	 *                                   field} is not accessible
+	 * @throws InvocationTargetException If the {@link java.lang.reflect.Method
+	 *                                   method} called throws an exception
+	 * @throws NoSuchFieldException      If a {@link java.lang.reflect.Field field}
+	 *                                   doesn't exist
 	 * @throws SecurityException         If the security manager throws an exception
 	 * @throws InterruptedException      If the latches/barriers throw an exception
 	 */
@@ -275,10 +304,11 @@ public class Runner {
 	}
 
 	/**
-	 * Runs a method with a given timeout.
+	 * Runs a {@link java.lang.reflect.Method method} with a given timeout.
 	 * 
-	 * @param method     The method to run
-	 * @param timeMethod The time method to use to time it
+	 * @param method     The {@link java.lang.reflect.Method method} to run
+	 * @param timeMethod The {@link org.jtimer.Runner.TimeMethod time method} to use
+	 *                   to time it
 	 * @param data       The series to add the data to
 	 * @param i          The current repetition
 	 * @param timeout    The timeout, in milliseconds

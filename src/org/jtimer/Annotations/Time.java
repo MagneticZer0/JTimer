@@ -1,13 +1,16 @@
 package org.jtimer.Annotations;
 
-import java.lang.annotation.*;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * Used to specifiy that this method should be timed. 
+ * Used to specifiy that this method should be timed.
  * <br>
  * {@link org.jtimer.Annotations.Time#repeat() repeat()} Has a repeat option, by
  * default this is 10. This is the number of times that the test will be
- * repeated. 
+ * repeated.
  * <br>
  * {@link org.jtimer.Annotations.Time#timeout() timeout()} Has a timeout time,
  * by default there is no timeout. The timeout is in nanosecond and a test will
@@ -16,7 +19,7 @@ import java.lang.annotation.*;
  * @author MagneticZero
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.ANNOTATION_TYPE, ElementType.METHOD})
+@Target({ ElementType.ANNOTATION_TYPE, ElementType.METHOD })
 public @interface Time {
 	/**
 	 * The amount of times that this method will be executed. By default this is 10.

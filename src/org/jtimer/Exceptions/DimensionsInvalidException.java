@@ -1,8 +1,8 @@
 package org.jtimer.Exceptions;
 
 /**
- * Used if a {@link org.jtimer.Regression.Matrix Matrix} doesn't have the necessary dimensions to execute the task at
- * hand.
+ * Used if a {@link org.jtimer.Regression.Matrix Matrix} doesn't have the
+ * necessary dimensions to execute the task at hand.
  * 
  * @author MagneticZero
  */

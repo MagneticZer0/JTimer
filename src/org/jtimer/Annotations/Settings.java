@@ -1,12 +1,15 @@
 package org.jtimer.Annotations;
 
-import java.lang.annotation.*;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 import org.jtimer.Misc.Setting;
 
 /**
  * A class level annotation that can be used to declare various settings that
- * JTimer can read and do things depending on these settings. 
+ * JTimer can read and do things depending on these settings.
  * <br>
  * {@link org.jtimer.Annotations.Settings#value() value()} This is a
  * comma-separated array of {@link org.jtimer.Misc.Setting} values.

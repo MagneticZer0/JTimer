@@ -1,13 +1,11 @@
 package org.jtimer.Collections;
 
 import java.lang.annotation.Annotation;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 /**
  * A version of a Multi-Hashmap I created in order to make the code more
