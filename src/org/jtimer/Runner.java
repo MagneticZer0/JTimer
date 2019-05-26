@@ -112,7 +112,7 @@ public class Runner {
 		time(pkg, new TimeMethod() {
 
 			@Override
-			public long timeMethod() {
+			public long time() {
 				return System.nanoTime();
 			}
 
@@ -329,11 +329,11 @@ public class Runner {
 				try {
 					gate.await();
 					method.setAccessible(true);
-					long startTime = timeMethod.timeMethod();
+					long startTime = timeMethod.time();
 					method.invoke(obj);
 					time.interrupt();
 					if (!Thread.interrupted() && !warmup) {
-						graphData(method, data, i, timeMethod.timeMethod() - startTime);
+						graphData(method, data, i, timeMethod.time() - startTime);
 					}
 					latch.countDown();
 				} catch (ReflectiveOperationException | BrokenBarrierException e) {
@@ -496,7 +496,7 @@ public class Runner {
 
 	/**
 	 * An interface used to change how things are timed. By default,
-	 * {@link TimeMethod#timeMethod() TimeMethod.timeMethod()} uses
+	 * {@link TimeMethod#time() TimeMethod.timeMethod()} uses
 	 * {@link java.lang.System#nanoTime() System.nanoTime()} and a method to convert
 	 * nanoseconds into your custom timing method.
 	 */
@@ -507,10 +507,13 @@ public class Runner {
 		 * 
 		 * @return A time
 		 */
-		public long timeMethod();
+		public long time();
 
 		/**
-		 * A way to convert nanoseconds into the method that you're using to time.
+		 * A way to convert nanoseconds into the time unit that you're using to time.
+		 * <br>
+		 * I.E. if my time is in seconds, then I would
+		 * <code>return nano*10<sup>-9</sup></code>
 		 * 
 		 * @param nano Nanosecond input
 		 * @return Nanoseconds to your time method
