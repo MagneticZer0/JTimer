@@ -109,19 +109,7 @@ public class Runner {
 	 *                   exception beforehand and then throw that.
 	 */
 	public static void time(String pkg) throws Throwable {
-		time(pkg, new TimeMethod() {
-
-			@Override
-			public long time() {
-				return System.nanoTime();
-			}
-
-			@Override
-			public long convertNano(long nano) {
-				return nano;
-			}
-
-		});
+		time(pkg, nano -> nano);
 	}
 
 	/**
@@ -329,11 +317,11 @@ public class Runner {
 				try {
 					gate.await();
 					method.setAccessible(true);
-					long startTime = timeMethod.time();
+					long startTime = System.nanoTime();
 					method.invoke(obj);
 					time.interrupt();
 					if (!Thread.interrupted() && !warmup) {
-						graphData(method, data, i, timeMethod.time() - startTime);
+						graphData(method, data, i, timeMethod.convertNano(System.nanoTime() - startTime));
 					}
 					latch.countDown();
 				} catch (ReflectiveOperationException | BrokenBarrierException e) {
@@ -496,19 +484,12 @@ public class Runner {
 
 	/**
 	 * An interface used to change how things are timed. By default,
-	 * {@link TimeMethod#time() TimeMethod.timeMethod()} uses
-	 * {@link java.lang.System#nanoTime() System.nanoTime()} and a method to convert
-	 * nanoseconds into your custom timing method.
+	 * {@link TimeMethod#convertNano(long) convertNano()} just returns
+	 * the time. Internally, everything is timed in nanoseconds so there is no need
+	 * to do a conversion. although if you want you data displayed in second, they
+	 * you may want to return something else.
 	 */
 	public interface TimeMethod {
-		/**
-		 * A way to get System time however you want it, by default this is
-		 * {@link java.lang.System#nanoTime() System.nanoTime()}.
-		 * 
-		 * @return A time
-		 */
-		public long time();
-
 		/**
 		 * A way to convert nanoseconds into the time unit that you're using to time.
 		 * <br>
@@ -516,7 +497,7 @@ public class Runner {
 		 * <code>return nano*10<sup>-9</sup></code>
 		 * 
 		 * @param nano Nanosecond input
-		 * @return Nanoseconds to your time method
+		 * @return Nanoseconds convert to your time unit
 		 */
 		public long convertNano(long nano);
 	}
