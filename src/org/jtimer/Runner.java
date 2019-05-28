@@ -93,8 +93,51 @@ public class Runner {
 
 	/**
 	 * Runs all {@link org.jtimer.Annotations.Time @Time} methods inside of the
+	 * {@link java.lang.Class Class} cls. See
+	 * {@link org.jtimer.Runner#time(String, TimeMethod) Runner.time(String,
+	 * TimeMethod)} for a more detailed method that does the same thing.
+	 * 
+	 * @see Runner#time(String, TimeMethod)
+	 * 
+	 * @param pkg The package name that contains the things you want to time
+	 * @throws Throwable This could be a number of things, although most things
+	 *                   should be already handeled by the {@link org.jtimer.Runner
+	 *                   Runner}, there's a special case though if the
+	 *                   {@link java.lang.Exception Exception} is a
+	 *                   {@link java.lang.reflect.InvocationTargetException
+	 *                   InvocationTargetException} then the Runner will unwrap the
+	 *                   exception beforehand and then throw that.
+	 */
+	public static void time(Class<?> cls) throws Throwable {
+		time(cls.getCanonicalName() + ".class");
+	}
+
+	/**
+	 * Runs all {@link org.jtimer.Annotations.Time @Time} methods inside of the
+	 * {@link java.lang.Class Class} cls using a specified
+	 * {@link org.jtimer.Runner.TimeMethod TimeMethod}. See
+	 * {@link org.jtimer.Runner#time(String, TimeMethod) Runner.time(String,
+	 * TimeMethod)} for a more detailed method that does the same thing.
+	 * 
+	 * @see Runner#time(String, TimeMethod)
+	 * 
+	 * @param pkg The package name that contains the things you want to time
+	 * @throws Throwable This could be a number of things, although most things
+	 *                   should be already handeled by the {@link org.jtimer.Runner
+	 *                   Runner}, there's a special case though if the
+	 *                   {@link java.lang.Exception Exception} is a
+	 *                   {@link java.lang.reflect.InvocationTargetException
+	 *                   InvocationTargetException} then the Runner will unwrap the
+	 *                   exception beforehand and then throw that.
+	 */
+	public static void time(Class<?> cls, TimeMethod timeMethod) throws Throwable {
+		time(cls.getCanonicalName() + ".class", timeMethod);
+	}
+
+	/**
+	 * Runs all {@link org.jtimer.Annotations.Time @Time} methods inside of the
 	 * package pkg. See {@link org.jtimer.Runner#time(String, TimeMethod)
-	 * Runner.time(String TimeMethod)} for a more detailed method that does the same
+	 * Runner.time(String, TimeMethod)} for a more detailed method that does the same
 	 * thing.
 	 * 
 	 * @see Runner#time(String, TimeMethod)
@@ -114,11 +157,12 @@ public class Runner {
 
 	/**
 	 * This will {@link java.lang.reflect.Method#invoke(Object, Object...) execute}
-	 * all {@link java.lang.reflect.Method methods} found in the timing package. If
-	 * the class has a {@link org.jtimer.Annotations.Warmup @Warmup} then all
-	 * methods with the {@link org.jtimer.Annotations.Time @Time} will be executed
-	 * by the {@link org.jtimer.Runner runner} a predefined amount of times. The
-	 * order of operations is anything with a
+	 * all {@link java.lang.reflect.Method methods} found in the timing package,
+	 * although if the String pkg ends with .class, it will only do the following on
+	 * that class. If the class has a {@link org.jtimer.Annotations.Warmup @Warmup}
+	 * then all methods with the {@link org.jtimer.Annotations.Time @Time} will be
+	 * executed by the {@link org.jtimer.Runner runner} a predefined amount of
+	 * times. The order of operations is anything with a
 	 * {@link org.jtimer.Annotations.BeforeClass @BeforeClass} which is only once.
 	 * Then {@link org.jtimer.Annotations.Before @Before} is executed before each
 	 * {@link org.jtimer.Annotations.Time @Time}, just like JUnit

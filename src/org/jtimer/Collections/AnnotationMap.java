@@ -34,7 +34,7 @@ public class AnnotationMap<V> {
 	}
 
 	/**
-	 * Puts a value into the map given a array of
+	 * Puts a value into the map given a collection of
 	 * {@link java.lang.annotation.Annotation annotations}
 	 * 
 	 * @param annotations The array of {@link java.lang.annotation.Annotation
