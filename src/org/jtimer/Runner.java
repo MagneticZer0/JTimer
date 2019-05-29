@@ -99,7 +99,7 @@ public class Runner {
 	 * 
 	 * @see Runner#time(String, TimeMethod)
 	 * 
-	 * @param pkg The package name that contains the things you want to time
+	 * @param cls The class that contains the things you want to time
 	 * @throws Throwable This could be a number of things, although most things
 	 *                   should be already handeled by the {@link org.jtimer.Runner
 	 *                   Runner}, there's a special case though if the
@@ -121,7 +121,8 @@ public class Runner {
 	 * 
 	 * @see Runner#time(String, TimeMethod)
 	 * 
-	 * @param pkg The package name that contains the things you want to time
+	 * @param cls The class that contains the things you want to time
+	 * @param timeMethod The functional interface for timing however you want
 	 * @throws Throwable This could be a number of things, although most things
 	 *                   should be already handeled by the {@link org.jtimer.Runner
 	 *                   Runner}, there's a special case though if the
