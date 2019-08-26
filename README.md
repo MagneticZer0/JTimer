@@ -5,11 +5,15 @@ A way to time Java methods as well as outputting the data gathered in a rather m
 ## Annotations
 
 There are multiple [annotations](https://magneticzer0.github.io/JTimer/org/jtimer/Annotations/package-summary.html) available in JTimer. The use cases can be viewed in the documentation pages available [here](https://magneticzer0.github.io/JTimer/). This is the current list of usable annotations in the current order of execution.
+* <a href="https://magneticzer0.github.io/JTimer/org/jtimer/Annotations/Warmup.html">Warmup</a>
 * <a href="https://magneticzer0.github.io/JTimer/org/jtimer/Annotations/BeforeClass.html">BeforeClass</a>
 * <a href="https://magneticzer0.github.io/JTimer/org/jtimer/Annotations/Before.html">Before</a>
+* <a href="https://magneticzer0.github.io/JTimer/org/jtimer/Annotations/DisplayName.html">DisplayName</a>
 * <a href="https://magneticzer0.github.io/JTimer/org/jtimer/Annotations/Time.html">Time</a>
 * <a href="https://magneticzer0.github.io/JTimer/org/jtimer/Annotations/After.html">After</a>
 * <a href="https://magneticzer0.github.io/JTimer/org/jtimer/Annotations/AfterClass.html">AfterClass</a>
+* <a href="https://magneticzer0.github.io/JTimer/org/jtimer/Annotations/Settings.html">Settings</a>
+
 
 ## Output
 
