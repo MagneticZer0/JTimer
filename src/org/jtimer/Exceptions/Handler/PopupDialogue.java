@@ -12,10 +12,8 @@ import java.util.zip.ZipOutputStream;
 
 import org.jtimer.Readability.If;
 
-import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
@@ -26,7 +24,6 @@ public class PopupDialogue {
 	private TextArea textArea = new TextArea();
 	private Button btnNumber1;
 	private Button btnNumber2;
-	private ScrollPane scrollBar;
 
 	/**
 	 * Used to create popup dialogues, for now only used for logging errors.
@@ -37,29 +34,25 @@ public class PopupDialogue {
 	 * @param btn2    If the second button is visible
 	 * @param btn2txt The text of the second button
 	 */
-	PopupDialogue(String title, boolean btn1, String btn1txt, boolean btn2, String btn2txt) {
+	public PopupDialogue(String title, boolean btn1, String btn1txt, boolean btn2, String btn2txt) {
 		Pane pane = new Pane();
 		popupStage.setTitle(title);
 		popupStage.setResizable(false);
 		popupStage.setAlwaysOnTop(true);
-		popupStage.setScene(new Scene(pane, 450, 300));
+		popupStage.setScene(new Scene(pane, 435, 265));
 		popupStage.setOnCloseRequest(e -> {
 			popupStage.hide();
 		});
 
-		scrollBar = new ScrollPane();
-		scrollBar.setLayoutX(10);
-		scrollBar.setLayoutY(11);
-		scrollBar.setPrefWidth(424);
-		scrollBar.setPrefHeight(219);
-		pane.getChildren().add(scrollBar);
-
+		textArea.setLayoutX(10);
+		textArea.setLayoutY(11);
+		textArea.setPrefWidth(424);
+		textArea.setPrefHeight(219);
 		textArea.setEditable(false);
-		textArea.setWrapText(true);
 		textArea.appendText("Well, looks like I've run into a problem!\n");
 		textArea.appendText("Ignore and exit buttons will create a log file!\n");
 		textArea.appendText("Please create a bug report and upload the file created, thanks!\n");
-		scrollBar.setContent(textArea);
+		pane.getChildren().add(textArea);
 
 		if (btn1) {
 			btnNumber1 = new Button(btn1txt);
@@ -80,10 +73,10 @@ public class PopupDialogue {
 				CreateLog();
 				System.exit(1);
 			});
-			btnNumber1.setLayoutX(new If<Double>(btn1 ^ btn2).Then(10d).Else(224d));
-			btnNumber1.setLayoutY(237);
-			btnNumber1.setPrefWidth(new If<Double>(btn1 ^ btn2).Then(424d).Else(210d));
-			btnNumber1.setPrefHeight(23);
+			btnNumber2.setLayoutX(new If<Double>(btn1 ^ btn2).Then(10d).Else(224d));
+			btnNumber2.setLayoutY(237);
+			btnNumber2.setPrefWidth(new If<Double>(btn1 ^ btn2).Then(424d).Else(210d));
+			btnNumber2.setPrefHeight(23);
 			pane.getChildren().add(btnNumber2);
 		}
 	}
@@ -134,9 +127,8 @@ public class PopupDialogue {
 		}
 		textArea.appendText(sb.toString());
 		textArea.appendText("\n### END EXCEPTION###\n");
-		Platform.runLater(() -> {
-			scrollBar.setVvalue(0);
-		});
+		textArea.selectHome(); //
+		textArea.deselect();   // This is to scroll to the top
 	}
 
 	/**

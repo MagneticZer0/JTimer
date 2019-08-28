@@ -27,6 +27,7 @@ import org.jtimer.Annotations.Time;
 import org.jtimer.Annotations.Warmup;
 import org.jtimer.Annotations.Handler.AnnotationHandler;
 import org.jtimer.Collections.AnnotationMap;
+import org.jtimer.Exceptions.Handler.PopupDialogue;
 import org.jtimer.Misc.Setting;
 
 import javafx.application.Platform;
