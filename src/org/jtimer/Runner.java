@@ -83,6 +83,11 @@ public class Runner {
 	 * would be efficient.
 	 */
 	private static HashMap<Method, AnnotationHandler> methodHandlers;
+	/**
+	 * This {@link org.jtimer.Exceptions.Handler.PopupDialogue PopupDialogue} is
+	 * responsible for catching and logging exceptions caused by running JTimer.
+	 */
+	private static PopupDialogue exceptionCatcher = new PopupDialogue("Exception Catcher", true, "Ignore and Continue", true, "Exit JTimer");
 
 	/**
 	 * Since everything is static there is no need to be able to instantiate a new
@@ -196,8 +201,8 @@ public class Runner {
 			for (Class<?> cls : classes) {
 				if (isInstantiable(cls)) {
 					Constructor<?> constructor = cls.getDeclaredConstructor(); // This is to access any protected classes
-					constructor.setAccessible(true);
-					object = constructor.newInstance(); //
+					constructor.setAccessible(true);                           //
+					object = constructor.newInstance();                        //
 					long repetitions = 0;
 					for (Method method : cls.getDeclaredMethods()) {
 						methodHandlers.put(method, new AnnotationHandler(method));
