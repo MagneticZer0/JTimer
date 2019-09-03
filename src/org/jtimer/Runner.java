@@ -115,7 +115,12 @@ public class Runner {
 	 *                   exception beforehand and then throw that.
 	 */
 	public static void time(Class<?> cls) throws Throwable {
-		time(cls.getCanonicalName() + ".class");
+		try {
+			time(cls.getCanonicalName() + ".class");
+		} catch (Throwable e) {
+			exceptionCatcher.writeError((Exception) e);
+			throw e;
+		}
 	}
 
 	/**
@@ -127,7 +132,7 @@ public class Runner {
 	 * 
 	 * @see Runner#time(String, TimeMethod)
 	 * 
-	 * @param cls The class that contains the things you want to time
+	 * @param cls        The class that contains the things you want to time
 	 * @param timeMethod The functional interface for timing however you want
 	 * @throws Throwable This could be a number of things, although most things
 	 *                   should be already handeled by the {@link org.jtimer.Runner
@@ -138,7 +143,12 @@ public class Runner {
 	 *                   exception beforehand and then throw that.
 	 */
 	public static void time(Class<?> cls, TimeMethod timeMethod) throws Throwable {
-		time(cls.getCanonicalName() + ".class", timeMethod);
+		try {
+			time(cls.getCanonicalName() + ".class", timeMethod);
+		} catch (Throwable e) {
+			exceptionCatcher.writeError((Exception) e);
+			throw e;
+		}
 	}
 
 	/**
@@ -159,7 +169,12 @@ public class Runner {
 	 *                   exception beforehand and then throw that.
 	 */
 	public static void time(String pkg) throws Throwable {
-		time(pkg, nano -> nano);
+		try {
+			time(pkg, nano -> nano);
+		} catch (Throwable e) {
+			exceptionCatcher.writeError((Exception) e);
+			throw e;
+		}
 	}
 
 	/**
@@ -186,7 +201,13 @@ public class Runner {
 	 *                   {@link java.lang.Exception Exception} is a
 	 *                   {@link java.lang.reflect.InvocationTargetException
 	 *                   InvocationTargetException} then the Runner will unwrap the
-	 *                   exception beforehand and then throw that.
+	 *                   exception beforehand and then throw that. And now with the
+	 *                   creation of
+	 *                   {@link org.jtimer.Exceptions.Catcher.PopupDialogue
+	 *                   PopupDialogue} exceptions will be logged and saved so that
+	 *                   they can be uploaded and further analyzed. The exceptions
+	 *                   will still be thrown, so catching and handling will be
+	 *                   still be up to the user.
 	 */
 	public static void time(String pkg, TimeMethod timeMethod) throws Throwable {
 		try {
@@ -244,6 +265,9 @@ public class Runner {
 			latch.countDown();
 		} catch (InvocationTargetException e) {
 			throw e.getCause();
+		} catch (Throwable e) {
+			exceptionCatcher.writeError((Exception) e);
+			throw e;
 		}
 	}
 
