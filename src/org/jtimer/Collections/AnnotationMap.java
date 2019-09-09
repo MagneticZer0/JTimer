@@ -1,11 +1,13 @@
 package org.jtimer.Collections;
 
 import java.lang.annotation.Annotation;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A version of a Multi-Hashmap I created in order to make the code more
@@ -17,7 +19,7 @@ import java.util.List;
  *
  * @param <V> The type of the value of the map
  */
-public class AnnotationMap<V> {
+public class AnnotationMap<V> extends AbstractMap<String, List<V>> {
 
 	/**
 	 * The internal data structure of the
@@ -57,13 +59,11 @@ public class AnnotationMap<V> {
 	 * @param value      The value to put into the map
 	 */
 	public void put(Annotation annotation, V value) {
-		if (internalMap.get(annotation.annotationType().getCanonicalName()) == null) {
-			List<V> list = new ArrayList<>(100);
-			list.add(value);
-			internalMap.put(annotation.annotationType().getCanonicalName(), list);
-		} else {
-			internalMap.get(annotation.annotationType().getCanonicalName()).add(value);
+		List<V> values = internalMap.get(annotation.annotationType().getCanonicalName());
+		if (values == null) {
+			internalMap.put(annotation.annotationType().getCanonicalName(), new ArrayList<V>());
 		}
+		internalMap.get(annotation.annotationType().getCanonicalName()).add(value);
 	}
 
 	/**
@@ -73,13 +73,16 @@ public class AnnotationMap<V> {
 	 * @param annotation The {@link java.lang.annotation.Annotation annotation}
 	 *                   class to get the objects for
 	 * @return Returns a list of objects that had this
-	 *         {@link java.lang.annotation.Annotation annotation} as a key
+	 *         {@link java.lang.annotation.Annotation annotation} as a key. If no
+	 *         values exist for a given key then the collection will return a empty
+	 *         list.
 	 */
 	public List<V> get(Class<? extends Annotation> annotation) {
-		if (internalMap.get(annotation.getCanonicalName()) == null) {
-			return Collections.emptyList();
-		} else {
-			return internalMap.get(annotation.getCanonicalName());
-		}
+		return internalMap.getOrDefault(annotation.getCanonicalName(), Collections.emptyList());
+	}
+
+	@Override
+	public Set<Entry<String, List<V>>> entrySet() {
+		return internalMap.entrySet();
 	}
 }

@@ -7,6 +7,7 @@ import java.util.concurrent.CountDownLatch;
 
 import javax.imageio.ImageIO;
 
+import org.jtimer.Collections.MultiMap;
 import org.jtimer.Readability.If;
 import org.jtimer.Regression.FunctionalFit;
 import org.jtimer.Regression.PolynomialFit;
