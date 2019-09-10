@@ -19,6 +19,7 @@ import com.sun.javafx.charts.Legend.LegendItem;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.event.Event;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
@@ -35,6 +36,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
@@ -451,6 +453,7 @@ public class Grapher extends Application {
 	@SuppressWarnings({ "unused", "unchecked" }) // Used through reflection
 	private void finish(boolean bestFit) {
 		Platform.runLater(() -> {
+			MultiMap<String, LegendItem> legendMap = new MultiMap<>();
 			isRunning = false;
 			plot.setTitle(plot.getTitle().split(" - ")[0]);
 			if (bestFit) {
@@ -464,6 +467,7 @@ public class Grapher extends Application {
 						if (node instanceof Legend) {
 							Legend legend = (Legend) node;
 							for (LegendItem item : legend.getItems()) {
+								legendMap.put(item.getText(), item);
 								for (Series<Number, Number> series : chart.getData()) {
 									if (series.getName().equals(item.getText())) {
 										item.getSymbol().setCursor(Cursor.HAND);
@@ -476,6 +480,13 @@ public class Grapher extends Application {
 													}
 												}
 												prettifyView(chart);
+											}
+											if (e.isShiftDown()) {
+												for (LegendItem otherNode : legendMap.get(item.getText())) {
+													if (otherNode != item) {
+														Event.fireEvent(otherNode.getSymbol(), new MouseEvent(MouseEvent.MOUSE_CLICKED, otherNode.getSymbol().getLayoutX(), otherNode.getSymbol().getLayoutY(), otherNode.getSymbol().getScaleX(), otherNode.getSymbol().getScaleY(), MouseButton.PRIMARY, 1, false, false, false, false, false, true, false, false, true, true, null));
+													}
+												}
 											}
 										});
 										break;
