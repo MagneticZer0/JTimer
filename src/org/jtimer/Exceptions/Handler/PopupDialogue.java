@@ -19,11 +19,31 @@ import javafx.scene.control.TextArea;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
+/**
+ * A PopupDialogue may become more versatile in the future, although as of right
+ * now its only purpose to to capture any of the exception, display them to the
+ * user, and give the user an option to save the log into a ZIP file.
+ * 
+ * @author MagneticZero
+ *
+ */
 public class PopupDialogue {
 
+	/**
+	 * The main stage for the PopupDialogue
+	 */
 	private Stage popupStage;
+	/**
+	 * The TextArea is where the exceptions are stored when they are caught.
+	 */
 	private TextArea textArea = new TextArea();
+	/**
+	 * This is the first button for a PopupDialogue
+	 */
 	private Button btnNumber1;
+	/**
+	 * This is the second button for a PopupDialogue
+	 */
 	private Button btnNumber2;
 
 	/**
