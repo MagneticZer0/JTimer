@@ -115,12 +115,7 @@ public class Runner {
 	 *                   exception beforehand and then throw that.
 	 */
 	public static void time(Class<?> cls) throws Throwable {
-		try {
-			time(cls.getCanonicalName() + ".class");
-		} catch (Throwable e) {
-			exceptionCatcher.writeError((Exception) e);
-			throw e;
-		}
+		time(cls.getCanonicalName() + ".class");
 	}
 
 	/**
@@ -143,12 +138,7 @@ public class Runner {
 	 *                   exception beforehand and then throw that.
 	 */
 	public static void time(Class<?> cls, TimeMethod timeMethod) throws Throwable {
-		try {
-			time(cls.getCanonicalName() + ".class", timeMethod);
-		} catch (Throwable e) {
-			exceptionCatcher.writeError((Exception) e);
-			throw e;
-		}
+		time(cls.getCanonicalName() + ".class", timeMethod);
 	}
 
 	/**
@@ -169,12 +159,7 @@ public class Runner {
 	 *                   exception beforehand and then throw that.
 	 */
 	public static void time(String pkg) throws Throwable {
-		try {
-			time(pkg, nano -> nano);
-		} catch (Throwable e) {
-			exceptionCatcher.writeError((Exception) e);
-			throw e;
-		}
+		time(pkg, nano -> nano);
 	}
 
 	/**

@@ -3,6 +3,7 @@ package org.jtimer.Exceptions.Handler;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -80,7 +81,6 @@ public class PopupDialogue {
 			if (btn1) {
 				btnNumber1 = new Button(btn1txt);
 				btnNumber1.setOnMouseClicked(e -> {
-					CreateLog();
 					popupStage.hide();
 				});
 				btnNumber1.setLayoutX(10);
@@ -130,7 +130,7 @@ public class PopupDialogue {
 			zos.closeEntry();
 			zos.close();
 			new File("Crash.log").delete();
-		} catch (Exception e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
@@ -141,17 +141,25 @@ public class PopupDialogue {
 	 * 
 	 * @param e The captured Exception
 	 */
-	public void writeError(Exception e) {
+	public void writeError(Throwable e) {
 		Platform.runLater(() -> {
 			popupStage.show();
-			textArea.appendText("\n### BEGIN EXCEPTION ###\n");
+			if (e instanceof Error) {
+				textArea.appendText("\n### BEGIN ERROR ###\n");
+			} else {
+				textArea.appendText("\n### BEGIN EXCEPTION ###\n");
+			}
 			StringBuilder sb = new StringBuilder(e.toString());
 			for (StackTraceElement ste : e.getStackTrace()) {
 				sb.append("\n");
 				sb.append(ste);
 			}
 			textArea.appendText(sb.toString());
-			textArea.appendText("\n### END EXCEPTION###\n");
+			if (e instanceof Error) {
+				textArea.appendText("\n### END ERROR ###\n");
+			} else {
+				textArea.appendText("\n### END EXCEPTION ###\n");
+			}
 			textArea.selectHome(); //
 			textArea.deselect();   // This is to scroll to the top
 		});
