@@ -113,6 +113,12 @@ class RunnerGrapherTestBestFit {
 
 		assertTrue(graph.get(Runner.getGrapher()) != null, "Best fit chart was not created!");
 	}
+	
+	@DisplayName("Grapher - Shift click toggle")
+	@Test
+	void grapherTest11() {
+		// TODO
+	}
 
 	@DisplayName("Runner - Default repetitions")
 	@Test
@@ -180,6 +186,7 @@ class RunnerGrapherTestBestFit {
 	@AfterAll
 	static void tearDown() {
 		new File(System.getProperty("user.home") + "/Desktop/test.png").delete(); // Make sure nothing is left over
+		Runner.getGrapher().clearData();
 	}
 
 	// This is to test the order of execution

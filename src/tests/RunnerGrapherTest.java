@@ -92,7 +92,7 @@ class RunnerGrapherTest {
 	void grapherTest5() throws InterruptedException, IOException {
 		saveKeypress();
 		typeKeys(KeyEvent.VK_T, KeyEvent.VK_E, KeyEvent.VK_S, KeyEvent.VK_T, KeyEvent.VK_ENTER);
-		Thread.sleep(500);
+		Thread.sleep(1000);
 		BufferedImage savedImage = ImageIO.read(new File(System.getProperty("user.home") + "/Desktop/test.png"));
 		assertAll("Saving image went wrong!", () -> assertAll("Image dimensions are incorrect!", () -> assertEquals(800, savedImage.getWidth(), "Image width is incorrect"), () -> assertEquals(600, savedImage.getHeight(), "Image height is incorrect")), () -> assertTrue(new File(System.getProperty("user.home") + "/Desktop/test.png").delete(), "Graph save file didn't exist!"));
 	}
@@ -224,6 +224,7 @@ class RunnerGrapherTest {
 	@AfterAll
 	static void tearDown() {
 		new File(System.getProperty("user.home") + "/Desktop/test.png").delete(); // Make sure nothing is left over
+		Runner.getGrapher().clearData();
 	}
 
 	// This is to test the order of execution

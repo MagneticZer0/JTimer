@@ -455,6 +455,20 @@ public class Grapher extends Application {
 	}
 
 	/**
+	 * This method is used to clear all the data within the graphs. There's really
+	 * no reason for you to use this method, I use it only for clearing data between
+	 * tests.
+	 */
+	public void clearData() {
+		Platform.runLater(() -> {
+			plot.getData().clear();
+			if (bestFitPlot != null) {
+				bestFitPlot.getData().clear();
+			}
+		});
+	}
+
+	/**
 	 * Finishes a {@link org.jtimer.Grapher graph} by:
 	 * <ul>
 	 * <li>Adding all the data</li>

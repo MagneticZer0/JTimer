@@ -67,6 +67,10 @@ import javafx.scene.chart.XYChart.Series;
 public class Runner {
 
 	/**
+	 * A string to store the version number for JTimer
+	 */
+	private static final String version = "v1.1.0";
+	/**
 	 * The {@link org.jtimer.Grapher graph} to put the data collected in.
 	 */
 	private static Grapher grapher = Grapher.start();

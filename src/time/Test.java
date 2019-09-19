@@ -55,7 +55,7 @@ public class Test {
 	}
 
 	@DisplayName("Tim Sort")
-	@Time(repeat = 3000)
+	@Time(repeat = 300)
 	public void sort() {
 		Collections.sort(list);
 	}
