@@ -83,9 +83,7 @@ public class PopupDialogue {
 			popupStage.setResizable(false);
 			popupStage.setAlwaysOnTop(true);
 			popupStage.setScene(new Scene(pane, 435, 265));
-			popupStage.setOnCloseRequest(e -> {
-				popupStage.hide();
-			});
+			popupStage.setOnCloseRequest(e -> popupStage.hide());
 
 			textArea.setLayoutX(10);
 			textArea.setLayoutY(11);
@@ -99,9 +97,7 @@ public class PopupDialogue {
 
 			if (btn1) {
 				btnNumber1 = new Button(btn1txt);
-				btnNumber1.setOnMouseClicked(e -> {
-					popupStage.hide();
-				});
+				btnNumber1.setOnMouseClicked(e -> popupStage.hide());
 				btnNumber1.setLayoutX(10);
 				btnNumber1.setLayoutY(237);
 				btnNumber1.setPrefWidth(new If<Double>(btn1 ^ btn2).Then(424d).Else(210d));
@@ -112,7 +108,7 @@ public class PopupDialogue {
 			if (btn2) {
 				btnNumber2 = new Button(btn2txt);
 				btnNumber2.setOnMouseClicked(e -> {
-					CreateLog();
+					createLog();
 					System.exit(1);
 				});
 				btnNumber2.setLayoutX(new If<Double>(btn1 ^ btn2).Then(10d).Else(224d));
@@ -128,7 +124,7 @@ public class PopupDialogue {
 	 * Happens whenever you press the Ignore or Exit buttons, creates a zip file
 	 * that contains a log with the Exception.
 	 */
-	protected void CreateLog() {
+	protected void createLog() {
 		try {
 			try (PrintWriter out = new PrintWriter("Crash.log")) {
 				out.println(textArea.getText());

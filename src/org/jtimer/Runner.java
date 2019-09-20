@@ -410,13 +410,13 @@ public class Runner {
 				} catch (ReflectiveOperationException | BrokenBarrierException e) {
 					// Ignore any exceptions related to reflection or barriers
 				} catch (Exception e) {
-					e.printStackTrace();
+					exceptionCatcher.writeError(e);
 				}
 			});
 			time = new Thread(() -> {
 				try {
 					gate.await();
-					long milliseconds = (long) Math.floor(timer / 1000000);
+					long milliseconds = timer / 1000000;
 					Thread.sleep(milliseconds, (int) (timer - milliseconds * 1000000));
 					runnable.interrupt();
 					if (!Thread.interrupted() && !warmup) {
@@ -468,11 +468,11 @@ public class Runner {
 				if (y < ((double) graphMax.get(grapher))) {
 					chart.getData().add(new XYChart.Data<>(x, y));
 				}
-				if (!grapher.plot.getData().contains(chart) && chart.getData().size() != 0) {
+				if (!grapher.plot.getData().contains(chart) && !chart.getData().isEmpty()) {
 					grapher.plot.getData().add(chart);
 				}
 			} catch (ReflectiveOperationException e) {
-				e.printStackTrace();
+				exceptionCatcher.writeError(e);
 			}
 			latch.countDown();
 		});

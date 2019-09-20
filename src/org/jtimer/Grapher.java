@@ -159,9 +159,7 @@ public class Grapher extends Application {
 		yAxis.setAnimated(false);
 
 		stage.setTitle("Grapher");
-		stage.setOnCloseRequest(e -> {
-			System.exit(0);
-		});
+		stage.setOnCloseRequest(e -> System.exit(0));
 
 		plot.setTitle(graphTitle);
 
@@ -286,9 +284,7 @@ public class Grapher extends Application {
 	 *                 warmup}
 	 */
 	public void setProgress(Double progress, boolean warmup) {
-		Platform.runLater(() -> {
-			plot.setTitle(graphTitle + new If<String>(warmup).Then(" Warmup ").Else("") + String.format("%3.2f", progress * 100) + "%");
-		});
+		Platform.runLater(() -> plot.setTitle(graphTitle + new If<String>(warmup).Then(" Warmup ").Else("") + String.format("%3.2f", progress * 100) + "%"));
 	}
 
 	/**
@@ -298,9 +294,7 @@ public class Grapher extends Application {
 	 * @param xDesc The string for the {@link org.jtimer.Grapher#xAxis x-axis} label
 	 */
 	public void setxDesc(String xDesc) {
-		Platform.runLater(() -> {
-			xAxis.setLabel(xDesc);
-		});
+		Platform.runLater(() -> xAxis.setLabel(xDesc));
 	}
 
 	/**
@@ -310,9 +304,7 @@ public class Grapher extends Application {
 	 * @param yDesc The string for the {@link org.jtimer.Grapher#xAxis y-axis} label
 	 */
 	public void setyDesc(String yDesc) {
-		Platform.runLater(() -> {
-			yAxis.setLabel(yDesc);
-		});
+		Platform.runLater(() -> yAxis.setLabel(yDesc));
 	}
 
 	/**
@@ -612,7 +604,7 @@ public class Grapher extends Application {
 		NumberAxis bestFitYAxis = new NumberAxis();
 		bestFitXAxis.labelProperty().bind(xAxis.labelProperty());
 		bestFitYAxis.labelProperty().bind(yAxis.labelProperty());
-		bestFitPlot = new ScatterChart<Number, Number>(bestFitXAxis, bestFitYAxis);
+		bestFitPlot = new ScatterChart<>(bestFitXAxis, bestFitYAxis);
 		TreeSet<Regression> regressions = null;
 		for (Series<Number, Number> series : plot.getData()) {
 			regressions = new TreeSet<>();
@@ -621,7 +613,7 @@ public class Grapher extends Application {
 				new PolynomialFit(data[0], data[1], 2).name("O(n)"),
 				new PolynomialFit(data[0], data[1], 3).name("O(n^2)"),
 				new PolynomialFit(data[0], data[1], 4).name("O(n^3)"),
-				new FunctionalFit(data[0], data[1], x -> Math.log(x)).name("O(lg n)"),
+				new FunctionalFit(data[0], data[1], Math::log).name("O(lg n)"),
 				new FunctionalFit(data[0], data[1], x -> x * Math.log(x)).name("O(n lg n)"),
 				new FunctionalFit(data[0], data[1], x -> Math.pow(2, x)).name("O(2^n)")
 			};
@@ -667,6 +659,6 @@ public class Grapher extends Application {
 	 * @return An {@link org.jtimer.Readability.If If} object
 	 */
 	private If<Double> If(boolean conditional) {
-		return new If<Double>(conditional);
+		return new If<>(conditional);
 	}
 }

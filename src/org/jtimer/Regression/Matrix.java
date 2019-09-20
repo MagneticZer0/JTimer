@@ -278,7 +278,7 @@ public class Matrix {
 	 * matrix}.
 	 */
 	public String toString() {
-		StringBuffer string = new StringBuffer();
+		StringBuilder string = new StringBuilder();
 		for (Double[] arr : matrix) {
 			string.append(Arrays.toString(arr) + "\n");
 		}

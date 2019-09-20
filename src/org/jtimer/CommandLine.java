@@ -9,7 +9,6 @@ import java.util.List;
 public class CommandLine {
 
 	public static void main(String[] args) throws FileNotFoundException {
-		args = new String[]{"-c", "System.out.println(\"Test\");", "-n", "Test", "-r", "6969"};
 		List<String> arguments = Arrays.asList(args);
 		int cIndex = arguments.indexOf("-c");
 		if (cIndex != -1) {
@@ -35,17 +34,15 @@ public class CommandLine {
 				System.out.println("Running the supplied code...");
 				runCode(codeToCompile);
 			} else {
-				System.out.println("You must supply code to the -c argument!");
+				System.err.println("You must supply code to the -c argument!");
 			}
 		}
 	}
 	
 	public static String getArgument(List<String> args, String argument, String defaultValue) {
 		int argIndex = args.indexOf(argument);
-		if (argIndex != -1) {
-			if (args.size() > argIndex+1) {
-				return args.get(argIndex+1);
-			}
+		if (argIndex != -1 && args.size() > argIndex+1) {
+			return args.get(argIndex+1);
 		}
 		return defaultValue;
 	}

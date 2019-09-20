@@ -66,6 +66,7 @@ public abstract class Regression implements Comparable<Regression> {
 	/**
 	 * Comapres one regression to another by using the error.
 	 */
+	@Override
 	public int compareTo(Regression reg) {
 		return (int) Math.round((error - reg.error) * 100);
 	}

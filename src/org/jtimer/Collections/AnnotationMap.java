@@ -100,8 +100,29 @@ public class AnnotationMap<V> extends AbstractMap<String, List<V>> {
 		return internalMap.getOrDefault(annotation.getCanonicalName(), Collections.emptyList());
 	}
 
+	/**
+	 * Returns the entry set of the map so that it can be iterated through
+	 * 
+	 * @return A set which contains all entries.
+	 */
 	@Override
 	public Set<Entry<String, List<V>>> entrySet() {
 		return internalMap.entrySet();
+	}
+
+	/**
+	 * Sees if an object is equal to this AnnotationMap
+	 * 
+	 * @return A boolean that is true if they're equal.
+	 */
+	@Override
+	public boolean equals(Object o) {
+		if (o == this) {
+			return true;
+		} else if (!(o instanceof AnnotationMap)) {
+			return false;
+		} else {
+			return internalMap.equals(((AnnotationMap<?>) o).internalMap);
+		}
 	}
 }
