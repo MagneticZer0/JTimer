@@ -110,7 +110,7 @@ public class Runner {
 	 * This {@link org.jtimer.Exceptions.Handler.PopupDialogue PopupDialogue} is
 	 * responsible for catching and logging exceptions caused by running JTimer.
 	 */
-	private static PopupDialogue exceptionCatcher = new PopupDialogue("Exception Catcher", true, "Ignore and Continue", true, "Exit JTimer");
+	protected static PopupDialogue exceptionCatcher = new PopupDialogue("Exception Catcher", true, "Ignore and Continue", true, "Exit JTimer");
 
 	/**
 	 * Since everything is static there is no need to be able to instantiate a new
@@ -468,8 +468,8 @@ public class Runner {
 				if (y < ((double) graphMax.get(grapher))) {
 					chart.getData().add(new XYChart.Data<>(x, y));
 				}
-				if (!grapher.plot.getData().contains(chart) && !chart.getData().isEmpty()) {
-					grapher.plot.getData().add(chart);
+				if (!grapher.getPlots().get(0).getData().contains(chart) && !chart.getData().isEmpty()) {
+					grapher.getPlots().get(0).getData().add(chart);
 				}
 			} catch (ReflectiveOperationException e) {
 				exceptionCatcher.writeError(e);

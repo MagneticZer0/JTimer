@@ -63,14 +63,14 @@ class RunnerGrapherTest {
 	@DisplayName("Grapher - X-Axis bounds are correct")
 	@Test
 	void grapherTest1() {
-		assertEquals(randomRepetitions, ((NumberAxis) Runner.getGrapher().plot.getXAxis()).getUpperBound(), "X-Axis has the wrong upper bound!");
+		assertEquals(randomRepetitions, ((NumberAxis) Runner.getGrapher().getPlots().get(0).getXAxis()).getUpperBound(), "X-Axis has the wrong upper bound!");
 	}
 
 	@DisplayName("Grapher - Custom Graph Title")
 	@Test
 	void grapherTest2() throws InterruptedException {
 		Thread.sleep(500);
-		assertEquals("Test", Runner.getGrapher().plot.getTitle(), "Custom graph title not properly set");
+		assertEquals("Test", Runner.getGrapher().getPlots().get(0).getTitle(), "Custom graph title not properly set");
 	}
 
 	@DisplayName("Grapher - X-Axis bounds are correct after toggling")
@@ -78,7 +78,7 @@ class RunnerGrapherTest {
 	void grapherTest3() throws InterruptedException {
 		randomRepetitionsNode(true);
 		Thread.sleep(100);
-		assertEquals(10, ((NumberAxis) Runner.getGrapher().plot.getXAxis()).getUpperBound(), "X-Axis has the wrong upper bound after toggling a node!");
+		assertEquals(10, ((NumberAxis) Runner.getGrapher().getPlots().get(0).getXAxis()).getUpperBound(), "X-Axis has the wrong upper bound after toggling a node!");
 	}
 
 	@DisplayName("Grapher - Node visiblity after being toggled")
@@ -115,7 +115,7 @@ class RunnerGrapherTest {
 	void grapherTest7() throws InterruptedException {
 		randomRepetitionsNode(true);
 		Thread.sleep(100);
-		assertEquals(randomRepetitions, ((NumberAxis) Runner.getGrapher().plot.getXAxis()).getUpperBound(), "X-Axis has the wrong upper bound after retoggling a node!");
+		assertEquals(randomRepetitions, ((NumberAxis) Runner.getGrapher().getPlots().get(0).getXAxis()).getUpperBound(), "X-Axis has the wrong upper bound after retoggling a node!");
 	}
 
 	@DisplayName("Grapher - Node visiblity after being retoggled")
@@ -128,7 +128,7 @@ class RunnerGrapherTest {
 	@Test
 	void grapherTest9() {
 		boolean customName = false;
-		for (Series<Number, Number> data : Runner.getGrapher().plot.getData()) {
+		for (Series<Number, Number> data : Runner.getGrapher().getPlots().get(0).getData()) {
 			if (data.getName().contains("Pickle")) {
 				customName = true;
 			}
@@ -139,10 +139,7 @@ class RunnerGrapherTest {
 	@DisplayName("Grapher - Best fit calculation")
 	@Test
 	void grapherTest10() throws Throwable {
-		Field graph = Grapher.class.getDeclaredField("bestFitPlot");
-		graph.setAccessible(true);
-
-		assertTrue(graph.get(Runner.getGrapher()) == null, "Best fit chart was created!");
+		assertEquals(Runner.getGrapher().getPlots().size(), 1, "Best fit chat was created!");
 	}
 	
 	@DisplayName("Grapher - Theme")
@@ -207,7 +204,7 @@ class RunnerGrapherTest {
 	@Test
 	void runnerTest8() {
 		boolean metaAnnotation = false;
-		for (Series<Number, Number> data : Runner.getGrapher().plot.getData()) {
+		for (Series<Number, Number> data : Runner.getGrapher().getPlots().get(0).getData()) {
 			if (data.getName().contains("META")) {
 				metaAnnotation = true;
 			}
@@ -329,7 +326,7 @@ class RunnerGrapherTest {
 	private void saveKeypress() {
 		try {
 			Robot saver = new Robot();
-			Platform.runLater(() -> Runner.getGrapher().plot.requestFocus());
+			Platform.runLater(() -> Runner.getGrapher().getPlots().get(0).requestFocus());
 			saver.keyPress(KeyEvent.VK_CONTROL);
 			saver.keyPress(KeyEvent.VK_S);
 			saver.keyRelease(KeyEvent.VK_CONTROL);
@@ -343,7 +340,7 @@ class RunnerGrapherTest {
 		try {
 			Robot typer = new Robot();
 			for (int key : keys) {
-				Platform.runLater(() -> Runner.getGrapher().plot.requestFocus());
+				Platform.runLater(() -> Runner.getGrapher().getPlots().get(0).requestFocus());
 				typer.keyPress(key);
 				typer.keyRelease(key);
 			}
@@ -355,7 +352,7 @@ class RunnerGrapherTest {
 	private void press(int[] coords) {
 		try {
 			Robot clicker = new Robot();
-			Platform.runLater(() -> Runner.getGrapher().plot.requestFocus());
+			Platform.runLater(() -> Runner.getGrapher().getPlots().get(0).requestFocus());
 			clicker.mouseMove(coords[0], coords[1]);
 			clicker.mousePress(InputEvent.BUTTON1_DOWN_MASK);
 			clicker.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
@@ -367,11 +364,11 @@ class RunnerGrapherTest {
 	private void zoomRobot() {
 		try {
 			Robot zoomer = new Robot();
-			Platform.runLater(() -> Runner.getGrapher().plot.requestFocus());
-			zoomer.mouseMove((int) Runner.getGrapher().plot.getScene().getWindow().getX() + 100, (int) Runner.getGrapher().plot.getScene().getWindow().getY() + 100);
+			Platform.runLater(() -> Runner.getGrapher().getPlots().get(0).requestFocus());
+			zoomer.mouseMove((int) Runner.getGrapher().getPlots().get(0).getScene().getWindow().getX() + 100, (int) Runner.getGrapher().getPlots().get(0).getScene().getWindow().getY() + 100);
 			zoomer.mousePress(InputEvent.BUTTON1_DOWN_MASK);
 			zoomer.keyPress(KeyEvent.VK_CONTROL);
-			zoomer.mouseMove((int) Runner.getGrapher().plot.getScene().getWindow().getX() + 200, (int) Runner.getGrapher().plot.getScene().getWindow().getY() + 200);
+			zoomer.mouseMove((int) Runner.getGrapher().getPlots().get(0).getScene().getWindow().getX() + 200, (int) Runner.getGrapher().getPlots().get(0).getScene().getWindow().getY() + 200);
 			zoomer.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
 			zoomer.keyRelease(KeyEvent.VK_CONTROL);
 		} catch (AWTException e) {
@@ -382,7 +379,7 @@ class RunnerGrapherTest {
 	private void unzoomRobot() {
 		try {
 			Robot unzoomer = new Robot();
-			Platform.runLater(() -> Runner.getGrapher().plot.requestFocus());
+			Platform.runLater(() -> Runner.getGrapher().getPlots().get(0).requestFocus());
 			unzoomer.mousePress(InputEvent.BUTTON3_DOWN_MASK);
 			unzoomer.mouseRelease(InputEvent.BUTTON3_DOWN_MASK);
 		} catch (AWTException e) {
@@ -393,7 +390,7 @@ class RunnerGrapherTest {
 
 	private boolean randomRepetitionsNode(boolean click) {
 		int[] coords = new int[2];
-		for (Node node : Runner.getGrapher().plot.getChildrenUnmodifiable()) {
+		for (Node node : Runner.getGrapher().getPlots().get(0).getChildrenUnmodifiable()) {
 			if (node instanceof Legend) {
 				for (LegendItem item : ((Legend) node).getItems()) {
 					if (item.getText().contains("RandomRepetitionsTest")) {
@@ -413,10 +410,10 @@ class RunnerGrapherTest {
 
 	private double[] getBounds() {
 		double[] bounds = new double[4];
-		bounds[0] = ((NumberAxis) Runner.getGrapher().plot.getXAxis()).getLowerBound();
-		bounds[1] = ((NumberAxis) Runner.getGrapher().plot.getXAxis()).getUpperBound();
-		bounds[2] = ((NumberAxis) Runner.getGrapher().plot.getYAxis()).getLowerBound();
-		bounds[3] = ((NumberAxis) Runner.getGrapher().plot.getYAxis()).getUpperBound();
+		bounds[0] = ((NumberAxis) Runner.getGrapher().getPlots().get(0).getXAxis()).getLowerBound();
+		bounds[1] = ((NumberAxis) Runner.getGrapher().getPlots().get(0).getXAxis()).getUpperBound();
+		bounds[2] = ((NumberAxis) Runner.getGrapher().getPlots().get(0).getYAxis()).getLowerBound();
+		bounds[3] = ((NumberAxis) Runner.getGrapher().getPlots().get(0).getYAxis()).getUpperBound();
 		return bounds;
 	}
 }

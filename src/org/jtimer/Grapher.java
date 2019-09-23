@@ -21,6 +21,10 @@ package org.jtimer;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.TreeSet;
 import java.util.concurrent.CountDownLatch;
 
@@ -123,7 +127,7 @@ public class Grapher extends Application {
 	 * The main {@link javafx.scene.chart.ScatterChart scatter chart}, this is where
 	 * all timed data will go.
 	 */
-	public ScatterChart<Number, Number> plot = new ScatterChart<>(xAxis, yAxis);
+	private ScatterChart<Number, Number> plot = new ScatterChart<>(xAxis, yAxis);
 	/**
 	 * The {@link javafx.scene.chart.ScatterChart scatter chart} that will be used
 	 * for the {@link org.jtimer.Grapher#lineOfBestFit() line of best fit}.
@@ -144,6 +148,11 @@ public class Grapher extends Application {
 	 * grapher} has finished everything.
 	 */
 	private CountDownLatch await = new CountDownLatch(1);
+	/**
+	 * Sotres the color for the theme so that the color can be applied to the best
+	 * fit graph if it is applied too early.
+	 */
+	private Color themeColor = null;
 
 	/**
 	 * Starts the {@link org.jtimer.Grapher grapher} by setting up the essential
@@ -181,7 +190,7 @@ public class Grapher extends Application {
 						ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", output);
 					}
 				} catch (IOException ex) {
-					ex.printStackTrace();
+					Runner.exceptionCatcher.writeError(ex);
 				}
 			}
 		});
@@ -233,18 +242,18 @@ public class Grapher extends Application {
 						if (selectionVisual.getWidth() + selectionVisual.getHeight() > 2) { // Avoids just pressing
 							selectionVisual.setWidth(0);
 							selectionVisual.setHeight(0);
-							NumberAxis xAxis = (NumberAxis) chart.getXAxis();
-							NumberAxis yAxis = (NumberAxis) chart.getYAxis();
-							double x1 = xAxis.getValueForDisplay(xAxis.sceneToLocal(selection.getX(), 0).getX()).doubleValue();
-							double y1 = yAxis.getValueForDisplay(yAxis.sceneToLocal(0, selection.getY()).getY()).doubleValue();
-							double x2 = xAxis.getValueForDisplay(xAxis.sceneToLocal(e.getSceneX(), 0).getX()).doubleValue();
-							double y2 = yAxis.getValueForDisplay(yAxis.sceneToLocal(0, e.getSceneY()).getY()).doubleValue();
-							xAxis.setLowerBound(Math.round(Math.min(x1, x2)));
-							xAxis.setUpperBound(Math.round(Math.max(x1, x2)));
-							xAxis.setTickUnit(Math.round((xAxis.getUpperBound() - xAxis.getLowerBound()) / 10));
-							yAxis.setLowerBound(Math.round(Math.min(y1, y2)));
-							yAxis.setUpperBound(Math.round(Math.max(y1, y2)));
-							yAxis.setTickUnit(Math.round((yAxis.getUpperBound() - yAxis.getLowerBound()) / 10));
+							NumberAxis axisX = (NumberAxis) chart.getXAxis();
+							NumberAxis axisY = (NumberAxis) chart.getYAxis();
+							double x1 = axisX.getValueForDisplay(axisX.sceneToLocal(selection.getX(), 0).getX()).doubleValue();
+							double y1 = axisY.getValueForDisplay(axisY.sceneToLocal(0, selection.getY()).getY()).doubleValue();
+							double x2 = axisX.getValueForDisplay(axisX.sceneToLocal(e.getSceneX(), 0).getX()).doubleValue();
+							double y2 = axisY.getValueForDisplay(axisY.sceneToLocal(0, e.getSceneY()).getY()).doubleValue();
+							axisX.setLowerBound(Math.round(Math.min(x1, x2)));
+							axisX.setUpperBound(Math.round(Math.max(x1, x2)));
+							axisX.setTickUnit(Math.round((axisX.getUpperBound() - axisX.getLowerBound()) / 10));
+							axisY.setLowerBound(Math.round(Math.min(y1, y2)));
+							axisY.setUpperBound(Math.round(Math.max(y1, y2)));
+							axisY.setTickUnit(Math.round((axisY.getUpperBound() - axisY.getLowerBound()) / 10));
 						}
 					}
 				});
@@ -363,7 +372,7 @@ public class Grapher extends Application {
 		try {
 			latch.await();
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			Runner.exceptionCatcher.writeError(e);
 		}
 		return grapher;
 	}
@@ -390,6 +399,7 @@ public class Grapher extends Application {
 	 */
 	public void setTheme(Color color) {
 		Platform.runLater(() -> {
+			themeColor = color;
 			double perBri = 0.299 * color.getRed() + 0.587 * color.getGreen() + 0.114 * color.getBlue();
 			pane.setBackground(new Background(new BackgroundFill(color, CornerRadii.EMPTY, Insets.EMPTY)));
 			if (perBri > 0.5) {
@@ -400,9 +410,9 @@ public class Grapher extends Application {
 			for (ScatterChart<?, ?> chart : new ScatterChart[] { plot, bestFitPlot }) {
 				if (chart != null) {
 					if (!color.darker().darker().equals(color)) {
-						chart.lookup(".chart-legend").setStyle("-fx-background-color: " + color.darker().darker().toString().replaceAll("0x", "#") + ";");
+						chart.lookup(".chart-legend").setStyle("-fx-background-color: " + color.darker().darker().toString().replace("0x", "#") + ";");
 					} else {
-						chart.lookup(".chart-legend").setStyle("-fx-background-color: " + color.brighter().brighter().toString().replaceAll("0x", "#") + ";");
+						chart.lookup(".chart-legend").setStyle("-fx-background-color: " + color.brighter().brighter().toString().replace("0x", "#") + ";");
 					}
 				}
 			}
@@ -420,21 +430,21 @@ public class Grapher extends Application {
 		Platform.runLater(() -> {
 			for (ScatterChart<?, ?> chart : new ScatterChart[] { plot, bestFitPlot }) {
 				if (chart != null) {
-					String hexValue = color.toString().replaceAll("0x", "#");
+					String hexValue = color.toString().replace("0x", "#");
 					for (Axis<?> axis : new Axis[] { chart.getXAxis(), chart.getYAxis() }) {
 						axis.setTickLabelFill(color);
 						axis.lookup(".axis-tick-mark").setStyle("-fx-stroke: " + hexValue + ";");
 						if (!color.darker().darker().equals(color)) {
-							axis.lookup(".axis-minor-tick-mark").setStyle("-fx-stroke: " + color.darker().darker().toString().replaceAll("0x", "#") + ";");
+							axis.lookup(".axis-minor-tick-mark").setStyle("-fx-stroke: " + color.darker().darker().toString().replace("0x", "#") + ";");
 						} else {
-							axis.lookup(".axis-tick-mark").setStyle("-fx-stroke: " + color.darker().darker().toString().replaceAll("0x", "#") + ";");
+							axis.lookup(".axis-tick-mark").setStyle("-fx-stroke: " + color.darker().darker().toString().replace("0x", "#") + ";");
 							axis.lookup(".axis-minor-tick-mark").setStyle("-fx-stroke: " + hexValue + ";");
 						}
 					}
 					chart.lookup(".chart-plot-background").setStyle("-fx-background-color: transparent ;");
 					chart.lookup(".chart-title").setStyle("-fx-text-fill: " + hexValue + ";");
-					chart.lookup(".chart-vertical-grid-lines").setStyle("-fx-stroke: " + color.desaturate().toString().replaceAll("0x", "#") + ";");
-					chart.lookup(".chart-horizontal-grid-lines").setStyle("-fx-stroke: " + color.desaturate().toString().replaceAll("0x", "#") + ";");
+					chart.lookup(".chart-vertical-grid-lines").setStyle("-fx-stroke: " + color.desaturate().toString().replace("0x", "#") + ";");
+					chart.lookup(".chart-horizontal-grid-lines").setStyle("-fx-stroke: " + color.desaturate().toString().replace("0x", "#") + ";");
 					for (Node axis : chart.lookupAll(".axis-label")) {
 						axis.setStyle("-fx-text-fill: " + hexValue + ";");
 					}
@@ -461,6 +471,21 @@ public class Grapher extends Application {
 	}
 
 	/**
+	 * Returns the plots used by the Grapher. If the best fit plot is not being used
+	 * it will not be returned in the list. The list is also immutable.
+	 * 
+	 * @return A list of plots used by the Grapher
+	 */
+	public List<ScatterChart<Number, Number>> getPlots() {
+		ArrayList<ScatterChart<Number, Number>> plots = new ArrayList<>();
+		plots.add(plot);
+		if (bestFitPlot != null) {
+			plots.add(bestFitPlot);
+		}
+		return Collections.unmodifiableList(plots);
+	}
+
+	/**
 	 * Finishes a {@link org.jtimer.Grapher graph} by:
 	 * <ul>
 	 * <li>Adding all the data</li>
@@ -483,6 +508,9 @@ public class Grapher extends Application {
 			plot.setTitle(plot.getTitle().split(" - ")[0]);
 			if (bestFit) {
 				lineOfBestFit();
+				if (themeColor != null) {
+					setTheme(themeColor);
+				}
 			}
 			prettifyView();
 			addZoomer();
@@ -580,16 +608,16 @@ public class Grapher extends Application {
 				}
 			}
 			double deviation = Math.sqrt(total / points);
-			NumberAxis xAxis = (NumberAxis) graph.getXAxis();
-			NumberAxis yAxis = (NumberAxis) graph.getYAxis();
-			yAxis.setAutoRanging(false);
-			yAxis.setLowerBound(Math.round(If((mean - maxDeviations * deviation < 0) || (deviation == 0)).Then(0d).Else(mean - maxDeviations * deviation)));
-			yAxis.setUpperBound(Math.round(If(deviation != 0).Then(mean + maxDeviations * deviation).Else(2 * mean)));
-			yAxis.setTickUnit(Math.round((yAxis.getUpperBound() - yAxis.getLowerBound()) / 10));
-			xAxis.setAutoRanging(false);
-			xAxis.setLowerBound(0);
-			xAxis.setUpperBound(maxX);
-			xAxis.setTickUnit(Math.round(maxX / 10));
+			NumberAxis axisX = (NumberAxis) graph.getXAxis();
+			NumberAxis axisY = (NumberAxis) graph.getYAxis();
+			axisY.setAutoRanging(false);
+			axisY.setLowerBound(Math.round(If((mean - maxDeviations * deviation < 0) || (deviation == 0)).Then(0d).Else(mean - maxDeviations * deviation)));
+			axisY.setUpperBound(Math.round(If(deviation != 0).Then(mean + maxDeviations * deviation).Else(2 * mean)));
+			axisY.setTickUnit(Math.round((axisY.getUpperBound() - axisY.getLowerBound()) / 10));
+			axisX.setAutoRanging(false);
+			axisX.setLowerBound(0);
+			axisX.setUpperBound(maxX);
+			axisX.setTickUnit(Math.round(maxX / 10));
 		}
 	}
 
@@ -607,19 +635,15 @@ public class Grapher extends Application {
 		bestFitPlot = new ScatterChart<>(bestFitXAxis, bestFitYAxis);
 		TreeSet<Regression> regressions = null;
 		for (Series<Number, Number> series : plot.getData()) {
-			regressions = new TreeSet<>();
 			double[][] data = getData(series);
-			Regression[] fit = {
+			regressions = new TreeSet<>(Arrays.asList(
 				new PolynomialFit(data[0], data[1], 2).name("O(n)"),
 				new PolynomialFit(data[0], data[1], 3).name("O(n^2)"),
 				new PolynomialFit(data[0], data[1], 4).name("O(n^3)"),
 				new FunctionalFit(data[0], data[1], Math::log).name("O(lg n)"),
 				new FunctionalFit(data[0], data[1], x -> x * Math.log(x)).name("O(n lg n)"),
 				new FunctionalFit(data[0], data[1], x -> Math.pow(2, x)).name("O(2^n)")
-			};
-			for (Regression reg : fit) {
-				regressions.add(reg);
-			}
+			));
 			Series<Number, Number> dataSeries = new Series<>();
 			dataSeries.setName(series.getName());
 			for (int i = 0; i <= data[0].length; i++) {
