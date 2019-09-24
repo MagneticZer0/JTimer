@@ -69,7 +69,7 @@ public class Runner {
 	/**
 	 * A string to store the version number for JTimer
 	 */
-	public static final String version = "v1.1.0";
+	public static final String version = "v1.1.3";
 	/**
 	 * The {@link org.jtimer.Grapher graph} to put the data collected in.
 	 */

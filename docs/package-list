@@ -2,6 +2,7 @@ org.jtimer
 org.jtimer.Annotations
 org.jtimer.Annotations.Handler
 org.jtimer.Collections
+org.jtimer.CommandLine
 org.jtimer.Exceptions
 org.jtimer.Exceptions.Handler
 org.jtimer.Misc
