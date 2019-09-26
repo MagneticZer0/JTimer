@@ -6,22 +6,26 @@ import java.lang.annotation.*;
 import java.lang.reflect.Method;
 
 import org.jtimer.Annotations.Handler.AnnotationHandler;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class AnnotationHandlerTest {
 
+	@DisplayName("Recursive annotations")
 	@Test
 	void recursion() {
 		AnnotationHandler handler = new AnnotationHandler(RecursiveAnnotationTest.class);
 		assertAll("Handler could not handle recursive annotations", () -> assertEquals(5, handler.getAnnotations().size(), "Annotations length is incorrect"), () -> assertTrue(handler.isAnnotationPresent(Recursive1.class), "Recursive1 is not present"), () -> assertTrue(handler.isAnnotationPresent(Recursive1.class), "Recursive1 is not present"));
 	}
 
+	@DisplayName("Meta annotations")
 	@Test
 	void annotation() {
 		AnnotationHandler handler = new AnnotationHandler(AnnClass.class);
 		assertAll("Annotation handler couldn't get all annotations", () -> assertTrue(handler.isAnnotationPresent(FunName.class), "Couldn't find FunName"), () -> assertTrue(handler.isAnnotationPresent(Ann.class), "Couldn't find Ann"), () -> assertEquals("Pickle", handler.getAnnotation(FunName.class).value(), "Couldn't get FunName.value()"));
 	}
 
+	@DisplayName("Annotation levels")
 	@Test
 	void level() throws Throwable {
 		Method test1 = AnnClass.class.getDeclaredMethod("Test1");
