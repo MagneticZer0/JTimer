@@ -466,6 +466,10 @@ public class Grapher extends Application {
 			plot.getData().clear();
 			if (bestFitPlot != null) {
 				bestFitPlot.getData().clear();
+				pane.getChildren().remove(bestFitPlot);
+				plot.prefHeightProperty().bind(pane.heightProperty());
+				plot.prefWidthProperty().bind(pane.widthProperty());
+				bestFitPlot = null;
 			}
 		});
 	}

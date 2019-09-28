@@ -1,5 +1,3 @@
-package tests;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.awt.AWTException;
@@ -55,7 +53,7 @@ class RunnerGrapherTest {
 	@BeforeAll
 	static void setup() throws Throwable {
 		new File(System.getProperty("user.home") + "/Desktop/test.png").delete(); // Make sure there's not one already there
-		Runner.time("tests.RunnerGrapherTest.class");
+		Runner.time("RunnerGrapherTest.class");
 		Runner.getGrapher().setGraphTitle("Test");
 		Runner.await();
 	}
