@@ -16,7 +16,6 @@ import java.lang.reflect.Modifier;
 
 import javax.imageio.ImageIO;
 
-import org.jtimer.Grapher;
 import org.jtimer.Runner;
 import org.jtimer.Annotations.*;
 import org.jtimer.Misc.Setting;
