@@ -24,6 +24,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -144,7 +145,7 @@ public class PopupDialogue {
 			in.close();
 			zos.closeEntry();
 			zos.close();
-			new File("Crash.log").delete();
+			Files.delete(new File("Crash.log").toPath());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
